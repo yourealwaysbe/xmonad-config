@@ -385,6 +385,7 @@ toWS = composeOne . concat $
 modKeyEvents :: Event -> X All
 modKeyEvents (KeyEvent {ev_event_type = t, ev_keycode = code}) 
   | (t == keyRelease) && (code == modKeyCode) = onModRelease
+  | otherwise = return (All True)
 
 myEventHook = modKeyEvents
 
