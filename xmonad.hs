@@ -289,7 +289,8 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 -- The available layouts.  Note that each layout is separated by |||,
 -- which denotes layout choice.
 --
-myLayout = decoration $ 
+myLayout = onWorkspace "f" Full $ -- don't decorate full
+           decoration $ 
            onWorkspace dashboardWorkspace tiled $ 
            (tiled ||| Mirror tiled ||| Full ||| simplestFloat)
   where
@@ -333,13 +334,13 @@ myLayout = decoration $
 myFullFloats = ["Firefox"]
 myFloats = ["MPlayer", "Gimp"]
 myDashboardResources = ["Music", "Mutt", "Irssi"]
-mySpecialWorkspaces = [dashboardWorkspace, "f"]
+mySpecialWorkspaces = [dashboardWorkspace,"f"]
 
 myManageHook = toWS <+> setFloat
 
 setFloat = composeAll . concat $
-    [ [ className =? c --> doFullFloat | c <- myFullFloats ]
-    , [ className =? c --> doFullFloat | c <- myFloats ]
+    [ [ className =? c --> doFloat | c <- myFloats ]
+    -- , [ className =? c --> doFullFloat | c <- myFullFloats ]
     , [ isFullscreen                  --> doFullFloat
       , resource  =? "desktop_window" --> doIgnore
       , resource  =? "kdesktop"       --> doIgnore ] ]
@@ -348,15 +349,17 @@ setFloat = composeAll . concat $
 toWS = composeOne . concat $ 
            [ [ resource =? t -?> doViewShift dashboardWorkspace | t <- myDashboardResources ] 
            , [ className =? t -?> doViewShift "f" | t <- myFullFloats ]
+           , [ className =? "Evince" -?> doAvoidList [dashboardWorkspace] ]
            , [ fmap Just doAvoidSpecial ] ]
            where 
                doViewShift = doF . viewShift
                viewShift = liftM2 (.) W.greedyView W.shift
-               doAvoidSpecial = doF avoidSpecial
-               avoidSpecial ss = viewShift ws ss
+               doAvoidSpecial = doAvoidList mySpecialWorkspaces
+               doAvoidList l = doF (avoidSpecial l)
+               avoidSpecial l ss = viewShift ws ss
                               where
                                   curws = W.currentTag ss
-                                  ws = if (curws `elem` mySpecialWorkspaces)
+                                  ws = if (curws `elem` l)
                                        then generalWorkspace
                                        else curws
 
