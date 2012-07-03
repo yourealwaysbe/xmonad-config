@@ -57,6 +57,9 @@ toggleMax = withFocused (\w -> windows (\ss ->
                 where
                     full = W.RationalRect 0 0 1 1
 
+
+-- Create and destroy workspaces
+
 createNewWorkspace = do
     ws <- gets (W.workspaces . windowset)
     addWorkspace ("w" ++ (show (length ws)))
@@ -67,25 +70,13 @@ cautiousRemoveWorkspace = do
     then removeEmptyWorkspace
     else return ()
 
+-- Stacking
 
 setModReleaseCatch :: X ()
 setModReleaseCatch = do
     XConf { theRoot = root, display = disp } <- ask 
-    -- let evt = allocaXEvent $
-    --               \p -> do maskEvent disp (keyPressMask .|. keyReleaseMask) p
-    --                        KeyEvent {ev_event_type = t, ev_keycode = c} <- getEvent p
-    --                        s <- keycodeToKeysym disp c 0
-    --                        return (t, s)
-    --     doRelease (t, s)
-    --         | t == keyRelease && s == xK_Super_L =
-    --             spawn "xmessage released!"
-    --         | otherwise = io evt >>= doRelease
-    -- io $ grabKey disp modkc anyModifier root False grabModeAsync grabModeAsync
     io $ grabKeyboard disp root False grabModeAsync grabModeAsync currentTime
     return ()
-    -- io evt >>= doRelease
-    -- io $ ungrabKey disp modkc anyModifier root
-    -- io $ ungrabKeyboard disp currentTime
 
 changeFocus f = do
     windows f
@@ -105,6 +96,7 @@ currentlyShifting = do
     (ws, l, n) <- gets ((liftM3 (,,) W.currentTag currentLayout currentNumWins) . windowset)
     return ((ws == dashboardWorkspace && n > 2) || ("Float" `isInfixOf` (description l)))
 
+-- See also myEventHook
 onModRelease = do
       XConf { display = disp, theRoot = root } <- ask
       io $ ungrabKeyboard disp currentTime
@@ -114,6 +106,8 @@ onModRelease = do
       else return ()
       return (All True)
 
+
+-- Keys
 
 myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- launch a terminal
