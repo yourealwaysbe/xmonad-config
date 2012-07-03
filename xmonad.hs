@@ -291,10 +291,12 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 -- which denotes layout choice.
 --
 myLayout = onWorkspace fullWorkspace Full $ -- don't decorate full
-           decoration $ 
-           onWorkspace dashboardWorkspace tiled $ 
-           (tiled ||| Mirror tiled ||| Full ||| simplestFloat)
+           decoratedWorkspaces ||| Full
   where
+    decoratedWorkspaces = decoration $ 
+                          onWorkspace dashboardWorkspace tiled $ 
+                          (tiled ||| Mirror tiled ||| simplestFloat)
+
     decoration = noFrillsDeco shrinkText titleTheme
 
     -- default tiling algorithm partitions the screen into two panes
