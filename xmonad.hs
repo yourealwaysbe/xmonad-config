@@ -103,7 +103,9 @@ currentNumWins ss = n
 
 currentlyShifting = do
     (ws, l, n) <- gets ((liftM3 (,,) W.currentTag currentLayout currentNumWins) . windowset)
-    return ((ws == dashboardWorkspace && n > 2) || ("Float" `isInfixOf` (description l)))
+    return ((ws == dashboardWorkspace && n > 2) || 
+            ("Float" `isInfixOf` (description l)) ||
+            ("Full" `isInfixOf` (description l)))
 
 -- See also myEventHook
 onModRelease = do
