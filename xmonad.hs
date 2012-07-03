@@ -329,7 +329,12 @@ myLayout = decoration $
 --
 -- To match on the WM_NAME, you can use 'title' in the same way that
 -- 'className' and 'resource' are used below.
---
+
+myFullFloats = ["Firefox"]
+myFloats = ["MPlayer", "Gimp"]
+myDashboardResources = ["Music", "Mutt", "Irssi"]
+mySpecialWorkspaces = [dashboardWorkspace, "f"]
+
 myManageHook = toWS <+> setFloat
 
 setFloat = composeAll . concat $
@@ -338,25 +343,23 @@ setFloat = composeAll . concat $
     , [ isFullscreen                  --> doFullFloat
       , resource  =? "desktop_window" --> doIgnore
       , resource  =? "kdesktop"       --> doIgnore ] ]
-    where
-        myFullFloats = ["Firefox", "Evince"]
-        myFloats = ["MPlayer", "Gimp"]
 
 
 toWS = composeOne . concat $ 
            [ [ resource =? t -?> doViewShift dashboardWorkspace | t <- myDashboardResources ] 
-           , [ fmap Just doAvoidDash ] ]
+           , [ className =? t -?> doViewShift "f" | t <- myFullFloats ]
+           , [ fmap Just doAvoidSpecial ] ]
            where 
                doViewShift = doF . viewShift
                viewShift = liftM2 (.) W.greedyView W.shift
-               doAvoidDash = doF avoidDash
-               avoidDash ss = viewShift ws ss
+               doAvoidSpecial = doF avoidSpecial
+               avoidSpecial ss = viewShift ws ss
                               where
                                   curws = W.currentTag ss
-                                  ws = if (curws == dashboardWorkspace)
+                                  ws = if (curws `elem` mySpecialWorkspaces)
                                        then generalWorkspace
                                        else curws
-               myDashboardResources = ["Music", "Mutt", "Irssi"]
+
 
 
 
