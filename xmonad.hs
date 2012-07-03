@@ -199,10 +199,10 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm .|. shiftMask, xK_Return), windows W.swapMaster)
  
     -- Swap the focused window with the next window
-    , ((modm .|. shiftMask, xK_j), windows W.swapDown  )
+    , ((modm .|. mod1Mask, xK_h), windows W.swapDown  )
  
     -- Swap the focused window with the previous window
-    , ((modm .|. shiftMask, xK_k), windows W.swapUp    )
+    , ((modm .|. mod1Mask, xK_l), windows W.swapUp    )
  
     -- Shrink the master area
     , ((modm, xK_h), sendMessage Shrink)
