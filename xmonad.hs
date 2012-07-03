@@ -24,13 +24,18 @@ generalWorkspace = "g"
 dashboardWorkspace = "d"
 fullWorkspace = "f"
 
+myActiveColor = "#b6ca8f"
+myActiveFontColor = "white"
+myInactiveColor = "#e7e7e7"
+myInactiveFontColor = "black"
+
 myTerminal      = "urxvt"
 myBorderWidth   = 1
 myModMask       = mod4Mask
 modKeyCode      = 133
 myWorkspaces    = [generalWorkspace, dashboardWorkspace, fullWorkspace]
-myNormalBorderColor = "#e7e7e7"
-myFocusedBorderColor = "#b6ca8f"
+myNormalBorderColor = myInactiveColor
+myFocusedBorderColor = myActiveColor
 
 -- Whether focus follows the mouse pointer.
 myFocusFollowsMouse :: Bool
@@ -41,14 +46,14 @@ myFont :: String
 myFont = "xft: Liberation Mono:pixelsize=13:antialiasing=true:hinting=true:rgba=rgb:lcdfilter=lcdnone"
 
 -- Bar
-myBar = "xmobar -B '#e7e7e7' -F 'black' -f '" ++ myFont ++ "' -t '%StdinReader%}{%date%'"
+myBar = "xmobar -B '" ++ myInactiveColor ++ "' -F '" ++ myInactiveFontColor ++ "' -f '" ++ myFont ++ "' -t '%StdinReader%}{%date%'"
 
-myPP = xmobarPP { ppCurrent = xmobarColor "white" "#b6ca8f" 
-                , ppHidden = xmobarColor "black" "#e7e7e7"
-                , ppWsSep = xmobarColor "" "#e7e7e7" " "
-                , ppTitle = xmobarColor "white" "#b6ca8f" 
-                , ppSep = xmobarColor "" "#e7e7e7" " "
-                , ppLayout = xmobarColor "black" "#e7e7e7"
+myPP = xmobarPP { ppCurrent = xmobarColor myActiveFontColor myActiveColor
+                , ppHidden = xmobarColor myInactiveFontColor myInactiveColor
+                , ppWsSep = xmobarColor "" myInactiveColor " "
+                , ppTitle = xmobarColor myActiveFontColor myActiveColor
+                , ppSep = xmobarColor "" myInactiveColor " "
+                , ppLayout = xmobarColor myInactiveFontColor myInactiveColor
                 }
 toggleStrutsKey XConfig {XMonad.modMask = modMask} = (modMask, xK_Tab)
 
