@@ -22,12 +22,13 @@ import qualified Data.Map        as M
 
 generalWorkspace = "g"
 dashboardWorkspace = "d"
+fullWorkspace = "f"
 
 myTerminal      = "urxvt"
 myBorderWidth   = 1
 myModMask       = mod4Mask
 modKeyCode      = 133
-myWorkspaces    = [generalWorkspace, dashboardWorkspace, "f"]
+myWorkspaces    = [generalWorkspace, dashboardWorkspace, fullWorkspace]
 myNormalBorderColor = "#e7e7e7"
 myFocusedBorderColor = "#b6ca8f"
 
@@ -289,7 +290,7 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 -- The available layouts.  Note that each layout is separated by |||,
 -- which denotes layout choice.
 --
-myLayout = onWorkspace "f" Full $ -- don't decorate full
+myLayout = onWorkspace fullWorkspace Full $ -- don't decorate full
            decoration $ 
            onWorkspace dashboardWorkspace tiled $ 
            (tiled ||| Mirror tiled ||| Full ||| simplestFloat)
@@ -334,7 +335,8 @@ myLayout = onWorkspace "f" Full $ -- don't decorate full
 myFullFloats = ["Firefox"]
 myFloats = ["MPlayer", "Gimp"]
 myDashboardResources = ["Music", "Mutt", "Irssi"]
-mySpecialWorkspaces = [dashboardWorkspace,"f"]
+mySpecialWorkspaces = [dashboardWorkspace, fullWorkspace]
+myNoDash = ["Evince","Plugin-container"]
 
 myManageHook = toWS <+> setFloat
 
@@ -348,13 +350,12 @@ setFloat = composeAll . concat $
 
 toWS = composeOne . concat $ 
            [ [ resource =? t -?> doViewShift dashboardWorkspace | t <- myDashboardResources ] 
-           , [ className =? t -?> doViewShift "f" | t <- myFullFloats ]
-           , [ className =? "Evince" -?> doAvoidList [dashboardWorkspace] ]
-           , [ fmap Just doAvoidSpecial ] ]
+           , [ className =? t -?> doViewShift fullWorkspace | t <- myFullFloats ]
+           , [ className =? t -?> doAvoidList [dashboardWorkspace] | t <- myNoDash ]
+           , [ fmap Just (doAvoidList mySpecialWorkspaces) ] ]
            where 
                doViewShift = doF . viewShift
                viewShift = liftM2 (.) W.greedyView W.shift
-               doAvoidSpecial = doAvoidList mySpecialWorkspaces
                doAvoidList l = doF (avoidSpecial l)
                avoidSpecial l ss = viewShift ws ss
                               where
