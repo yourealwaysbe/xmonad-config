@@ -15,6 +15,7 @@ import Control.Monad (liftM2, liftM3)
 import XMonad.Hooks.ManageHelpers
 import XMonad.Layout.SimplestFloat
 import XMonad.Layout.PerWorkspace
+import XMonad.Util.EZConfig
 
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
@@ -49,6 +50,8 @@ myPP = xmobarPP { ppCurrent = xmobarColor "white" "#b6ca8f"
                 , ppLayout = xmobarColor "black" "#e7e7e7"
                 }
 toggleStrutsKey XConfig {XMonad.modMask = modMask} = (modMask, xK_Tab)
+
+-- Fullscreening
 
 toggleMax = withFocused (\w -> windows (\ss ->
                 if M.member w (W.floating ss)
@@ -108,6 +111,8 @@ onModRelease = do
 
 
 -- Keys
+--
+-- Note additionalKeys after defaultConfig.  TODO: change all to EZConfig
 
 myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- launch a terminal
@@ -439,4 +444,5 @@ defaults = defaultConfig {
         handleEventHook    = myEventHook,
         logHook            = myLogHook,
         startupHook        = myStartupHook
-    }
+    } `additionalKeysP`
+    [ ("<XF86TouchpadToggle>", spawn "xset s off; xset -dpms") ]
