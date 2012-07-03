@@ -317,6 +317,7 @@ myLayout = onWorkspace fullWorkspace Full $ -- don't decorate full
                     , inactiveColor = "#e7e7e7"
                     , inactiveBorderColor = "#e7e7e7"
                     , fontName = myFont
+                    , decoHeight = 20
                     }
  
 ------------------------------------------------------------------------
