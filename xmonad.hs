@@ -37,6 +37,7 @@ myWorkspaces    = [generalWorkspace, dashboardWorkspace, fullWorkspace]
 myNormalBorderColor = myInactiveColor
 myFocusedBorderColor = myActiveColor
 
+
 -- Whether focus follows the mouse pointer.
 myFocusFollowsMouse :: Bool
 myFocusFollowsMouse = False
@@ -388,6 +389,7 @@ modKeyEvents :: Event -> X All
 modKeyEvents (KeyEvent {ev_event_type = t, ev_keycode = code}) 
   | (t == keyRelease) && (code == modKeyCode) = onModRelease
   | otherwise = return (All True)
+modKeyEvents _ = return (All True)
 
 myEventHook = modKeyEvents
 
@@ -419,14 +421,13 @@ myLogHook = return ()
 -- XMonad.Hooks.EwmhDesktops to modify their defaultConfig as a whole.
 -- It will add initialization of EWMH support to your custom startup
 -- hook by combining it with ewmhDesktopsStartup.
---
-myStartupHook = return ()
+
+-- hide struts by default
+myStartupHook = sendMessage ToggleStruts
  
 ------------------------------------------------------------------------
 -- Now run xmonad with all the defaults we set up.
  
--- Run xmonad with the settings you specify. No need to modify this.
---
 main = xmonad =<< statusBar myBar myPP toggleStrutsKey defaults
  
 -- A structure containing your configuration settings, overriding
