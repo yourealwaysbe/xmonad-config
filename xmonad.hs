@@ -73,7 +73,8 @@ toggleMax = withFocused (\w -> windows (\ss ->
 createNewWorkspace = do
     ws <- gets (W.workspaces . windowset)
     addWorkspace ("w" ++ (show (length ws)))
-
+    sendMessage ToggleStruts
+        
 cautiousRemoveWorkspace = do
     curtag <- gets (W.currentTag . windowset)
     if not (elem curtag myWorkspaces)
@@ -423,7 +424,7 @@ myLogHook = return ()
 -- hook by combining it with ewmhDesktopsStartup.
 
 -- hide struts by default
-myStartupHook = sendMessage ToggleStruts
+myStartupHook = broadcastMessage ToggleStruts
  
 ------------------------------------------------------------------------
 -- Now run xmonad with all the defaults we set up.
