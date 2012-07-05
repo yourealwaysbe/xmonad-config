@@ -46,13 +46,22 @@ myFocusFollowsMouse = False
 
 -- Default font
 myFont :: String
-myFont = "xft: Liberation Mono:pixelsize=13:antialiasing=true:hinting=true:rgba=rgb:lcdfilter=lcdnone"
+myFont = "xft: Liberation Mono" ++
+         ":pixelsize=13" ++
+         ":antialiasing=true" ++
+         ":hinting=true" ++
+         ":rgba=rgb2" ++
+         ":lcdfilter=lcdnone"
 
 -- Bar
 
 colorActive = xmobarColor myActiveFontColor myActiveColor
 colorInactive = xmobarColor myInactiveFontColor myInactiveColor
 
+
+
+-- max length of win title on bar (better if func of space vs. windows, but hey)
+myTitleLength = 200
 
 -- Get a list of open windows for bar
 logWindows :: Logger
@@ -64,10 +73,12 @@ getWindowLog ws =
     where
         curw = W.peek ws
         addTitle s w = fmap ((s ++) . formatTitle (Just w == curw) . show) $ getName w 
-        formatTitle focused s = if focused 
-                                then " " ++ colorActive s ++ " "
-                                else " " ++ colorInactive s ++ " "
-
+        formatTitle f s = 
+            if f
+            then " " ++ colorActive s' ++ " "
+            else " " ++ colorInactive s' ++ " "
+            where
+                s' = take myTitleLength s
 
 myBar = "xmobar " ++
         "-B '" ++ myInactiveColor ++ "' " ++
