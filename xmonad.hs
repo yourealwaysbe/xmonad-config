@@ -134,11 +134,9 @@ currentLayout :: W.StackSet i l a s sd -> l
 currentLayout = W.layout . W.workspace . W.current
 
 currentNumWins :: W.StackSet i l a s sd -> Int
-currentNumWins ss = n
-                    where
-                        ms = (W.stack . W.workspace . W.current) ss
-                        n = maybe 0 countWins ms
-                        countWins s = 1 + length(W.up s) + length (W.down s)
+currentNumWins = maybe 0 countWins . W.stack . W.workspace . W.current
+                 where
+                     countWins s = 1 + length(W.up s) + length (W.down s)
 
 currentlyShifting = do
     (ws, l, n) <- gets ((liftM3 (,,) W.currentTag currentLayout currentNumWins) . windowset)
