@@ -73,12 +73,10 @@ getWindowLog ws =
     where
         curw = W.peek ws
         addTitle s w = fmap ((s ++) . formatTitle (Just w == curw) . show) $ getName w 
-        formatTitle f s = 
-            if f
-            then " " ++ colorActive s' ++ " "
-            else " " ++ colorInactive s' ++ " "
-            where
-                s' = take myTitleLength s
+        formatTitle f s = let s' = take myTitleLength s in 
+                          if f
+                          then " " ++ colorActive s' ++ " "
+                          else " " ++ colorInactive s' ++ " "
 
 myBar = "xmobar " ++
         "-B '" ++ myInactiveColor ++ "' " ++
