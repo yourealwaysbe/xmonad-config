@@ -69,7 +69,7 @@ getWindowLog ws =
                                 else " " ++ colorInactive s ++ " "
 
 
-myBar = "xmobar" ++
+myBar = "xmobar " ++
         "-B '" ++ myInactiveColor ++ "' " ++
         "-F '" ++ myInactiveFontColor ++ "' " ++
         "-f '" ++ myFont ++ "' " ++
