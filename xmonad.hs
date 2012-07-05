@@ -74,9 +74,8 @@ getWindowLog ws =
         curw = W.peek ws
         addTitle s w = fmap ((s ++) . formatTitle (Just w == curw) . show) $ getName w 
         formatTitle f s = let s' = take myTitleLength s in 
-                          if f
-                          then " " ++ colorActive s' ++ " "
-                          else " " ++ colorInactive s' ++ " "
+                          let color = if f then colorActive else colorInactive in
+                          " " ++ color s' ++ " "
 
 myBar = "xmobar " ++
         "-B '" ++ myInactiveColor ++ "' " ++
