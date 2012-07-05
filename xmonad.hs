@@ -72,9 +72,11 @@ getWindowLog ws =
     fmap Just $ (foldM addTitle "") (W.index ws)
     where
         curw = W.peek ws
-        addTitle s w = fmap ((s ++) . formatTitle (Just w == curw) . show) $ getName w 
+        addTitle s w = let isCur = (Just w == curw) in
+                       fmap ((s ++) . formatTitle isCur . show) $ getName w 
         formatTitle f s = let s' = take myTitleLength s in 
-                          let color = if f then colorActive else colorInactive in
+                          let color = if f then colorActive 
+                                           else colorInactive in
                           " " ++ color s' ++ " "
 
 myBar = "xmobar " ++
