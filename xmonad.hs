@@ -1,21 +1,23 @@
 
-import XMonad
+import Control.Monad (liftM2, liftM3, foldM)
 import Data.List
 import Data.Monoid
+import Data.Traversable (traverse)
 import System.Exit
+import XMonad
 import XMonad.Hooks.DebugKeyEvents
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.DynamicLog
 import XMonad.Util.Loggers
-import XMonad.Layout.NoFrillsDecoration 
+import XMonad.Util.NamedWindows (getName)
 import XMonad.Util.Themes
+import XMonad.Util.EZConfig
 import XMonad.Actions.CycleWS
 import XMonad.Actions.DynamicWorkspaces
-import Control.Monad (liftM2, liftM3)
 import XMonad.Hooks.ManageHelpers
+import XMonad.Layout.NoFrillsDecoration 
 import XMonad.Layout.SimplestFloat
 import XMonad.Layout.PerWorkspace
-import XMonad.Util.EZConfig
 
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
@@ -47,14 +49,40 @@ myFont :: String
 myFont = "xft: Liberation Mono:pixelsize=13:antialiasing=true:hinting=true:rgba=rgb:lcdfilter=lcdnone"
 
 -- Bar
-myBar = "xmobar -B '" ++ myInactiveColor ++ "' -F '" ++ myInactiveFontColor ++ "' -f '" ++ myFont ++ "' -t '%StdinReader%}{%date%'"
 
-myPP = xmobarPP { ppCurrent = xmobarColor myActiveFontColor myActiveColor
-                , ppHidden = xmobarColor myInactiveFontColor myInactiveColor
-                , ppWsSep = xmobarColor "" myInactiveColor " "
-                , ppTitle = xmobarColor myActiveFontColor myActiveColor
-                , ppSep = xmobarColor "" myInactiveColor " "
-                , ppLayout = xmobarColor myInactiveFontColor myInactiveColor
+colorActive = xmobarColor myActiveFontColor myActiveColor
+colorInactive = xmobarColor myInactiveFontColor myInactiveColor
+
+
+-- Get a list of open windows for bar
+logWindows :: Logger
+logWindows = withWindowSet getWindowLog
+
+getWindowLog :: WindowSet -> X (Maybe String)
+getWindowLog ws =
+    fmap Just $ (foldM addTitle "") (W.index ws)
+    where
+        curw = W.peek ws
+        addTitle s w = fmap ((s ++) . formatTitle (Just w == curw) . show) $ getName w 
+        formatTitle focused s = if focused 
+                                then " " ++ colorActive s ++ " "
+                                else " " ++ colorInactive s ++ " "
+
+
+myBar = "xmobar" ++
+        "-B '" ++ myInactiveColor ++ "' " ++
+        "-F '" ++ myInactiveFontColor ++ "' " ++
+        "-f '" ++ myFont ++ "' " ++
+        "-t '%StdinReader%}{%date%'"
+
+myPP = xmobarPP { ppCurrent = colorActive
+                , ppHidden = colorInactive
+                , ppHiddenNoWindows = colorInactive
+                , ppWsSep = colorInactive " "
+                , ppTitle = \w -> "" -- xmobarColor myActiveFontColor myActiveColor
+                , ppSep = colorInactive " "
+                , ppLayout = colorInactive
+                , ppExtras = [ logWindows ]
                 }
 toggleStrutsKey XConfig {XMonad.modMask = modMask} = (modMask, xK_Tab)
 
