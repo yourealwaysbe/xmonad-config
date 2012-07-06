@@ -1,5 +1,5 @@
 
-import Control.Monad (liftM2, liftM3, foldM)
+import Control.Monad (liftM2, liftM3, foldM, mapM)
 import Data.List
 import Data.Monoid
 import Data.Traversable (traverse)
@@ -18,6 +18,7 @@ import XMonad.Hooks.ManageHelpers
 import XMonad.Layout.NoFrillsDecoration 
 import XMonad.Layout.SimplestFloat
 import XMonad.Layout.PerWorkspace
+import XMonad.Layout.Minimize
 
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
@@ -119,6 +120,27 @@ cautiousRemoveWorkspace = do
     then removeEmptyWorkspace
     else return ()
 
+-- Hide floating layer if not focussed
+
+doIfFloat :: (Window -> X()) -> M.Map Window W.RationalRect -> Window -> X ()
+doIfFloat f floats w = if (M.member w floats) then f w else return ()
+
+withWindows :: (Window -> X ()) -> X ()
+withWindows f = do
+    wins <- gets (W.allWindows . windowset)
+    mapM f wins
+    return ()
+    
+
+showHideFloats :: X ()
+showHideFloats = do
+    (mw, floats, alive) <- gets (liftM3 (,,) W.peek W.floating W.index . windowset)
+    maybe (return ()) (\w -> if (M.member w floats) || not (w `elem` alive)
+                             then spawn "xmessage 'oh dear'" -- withWindows (doIfFloat (sendMessage . RestoreMinimizedWin) floats)
+                             else withWindows (doIfFloat minimizeWindow floats)) mw
+     
+    
+
 -- Stacking
 
 setModReleaseCatch :: X ()
@@ -129,15 +151,14 @@ setModReleaseCatch = do
 
 changeFocus f = do
     windows f
+    showHideFloats
     setModReleaseCatch
 
 currentLayout :: W.StackSet i l a s sd -> l
 currentLayout = W.layout . W.workspace . W.current
 
 currentNumWins :: W.StackSet i l a s sd -> Int
-currentNumWins = maybe 0 countWins . W.stack . W.workspace . W.current
-                 where
-                     countWins s = 1 + length(W.up s) + length (W.down s)
+currentNumWins = length . W.index 
 
 currentlyShifting = do
     (ws, l, n) <- gets ((liftM3 (,,) W.currentTag currentLayout currentNumWins) . windowset)
@@ -168,6 +189,12 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- maximise window
     , ((modm, xK_Up), toggleMax)
+
+     -- minimize window
+    , ((modm, xK_Down), withFocused minimizeWindow)
+
+    -- minimize window restore
+    , ((modm .|. shiftMask, xK_Down), sendMessage RestoreNextMinimizedWin)
 
     -- add a tag
     , ((modm, xK_a), createNewWorkspace)
@@ -330,35 +357,37 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 -- The available layouts.  Note that each layout is separated by |||,
 -- which denotes layout choice.
 --
-myLayout = onWorkspace fullWorkspace Full $ -- don't decorate full
-           decoratedWorkspaces ||| Full
-  where
-    decoratedWorkspaces = decoration $ 
-                          onWorkspace dashboardWorkspace tiled $ 
-                          (tiled ||| Mirror tiled ||| simplestFloat)
+myLayout = minimize layouts
+    where
+        layouts = onWorkspace fullWorkspace Full $ -- don't decorate full
+                  decoratedWorkspaces ||| Full
+                  
+        decoratedWorkspaces = decoration $ 
+                              onWorkspace dashboardWorkspace tiled $ 
+                              (tiled ||| Mirror tiled ||| simplestFloat)
 
-    decoration = noFrillsDeco shrinkText titleTheme
+        decoration = noFrillsDeco shrinkText titleTheme
 
-    -- default tiling algorithm partitions the screen into two panes
-    tiled   = Tall nmaster delta ratio
+        -- default tiling algorithm partitions the screen into two panes
+        tiled   = Tall nmaster delta ratio
  
-    -- The default number of windows in the master pane
-    nmaster = 1
+        -- The default number of windows in the master pane
+        nmaster = 1
  
-    -- Default proportion of screen occupied by master pane
-    ratio   = 1/2
+        -- Default proportion of screen occupied by master pane
+        ratio   = 1/2
  
-    -- Percent of screen to increment by when resizing panes
-    delta   = 3/100
+        -- Percent of screen to increment by when resizing panes
+        delta   = 3/100
 
-    titleTheme = defaultTheme
-                    { activeColor = "#b6ca8f"
-                    , activeBorderColor = "#b6ca8f"
-                    , inactiveColor = "#e7e7e7"
-                    , inactiveBorderColor = "#e7e7e7"
-                    , fontName = myFont
-                    , decoHeight = 20
-                    }
+        titleTheme = defaultTheme
+                        { activeColor = "#b6ca8f"
+                        , activeBorderColor = "#b6ca8f"
+                        , inactiveColor = "#e7e7e7"
+                        , inactiveBorderColor = "#e7e7e7"
+                        , fontName = myFont
+                        , decoHeight = 18
+                        }
  
 ------------------------------------------------------------------------
 -- Window rules:
@@ -376,7 +405,7 @@ myLayout = onWorkspace fullWorkspace Full $ -- don't decorate full
 -- 'className' and 'resource' are used below.
 
 myFullFloats = ["Firefox"]
-myFloats = ["MPlayer", "Gimp"]
+myFloats = ["MPlayer", "Gimp", "Skype"]
 myDashboardResources = ["Music", "Mutt", "Irssi"]
 mySpecialWorkspaces = [dashboardWorkspace, fullWorkspace]
 myNoDash = ["Evince","Plugin-container"]
