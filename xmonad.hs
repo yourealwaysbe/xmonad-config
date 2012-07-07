@@ -109,6 +109,31 @@ cautiousRemoveWorkspace = do
     then removeEmptyWorkspace
     else return ()
 
+
+
+-- Show hide floats so we can see tiles beneath.  See also stacking and logHook.
+
+doIfFloat :: (Window -> X()) -> M.Map Window W.RationalRect -> Window -> X ()
+doIfFloat f floats w = if (M.member w floats) then f w else return ()
+
+withWindows :: (Window -> X ()) -> X ()
+withWindows f = do
+    wins <- gets (W.allWindows . windowset)
+    mapM f wins
+    return ()
+    
+
+showHideFloats :: X ()
+showHideFloats = do
+    (mw, floats, alive) <- gets (liftM3 (,,) W.peek W.floating W.index . windowset)
+    maybe (return ()) (\w -> if (M.member w floats) 
+                             -- for floats, let modkeyrelease shift master 
+                             then return () 
+                             else withWindows (doIfFloat hide floats)) mw
+
+
+
+
 -- Stacking
 
 setModReleaseCatch :: X ()
@@ -279,14 +304,13 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     zip (zip (repeat (modm)) [xK_1..xK_9]) (map (withNthWorkspace W.greedyView) [0..])
     ++
     zip (zip (repeat (modm .|. shiftMask)) [xK_1..xK_9]) (map (withNthWorkspace W.shift) [0..])
-
-    --
-    -- mod-{w,e,r}, Switch to physical/Xinerama screens 1, 2, or 3
-    -- mod-shift-{w,e,r}, Move client to screen 1, 2, or 3
-    --
-    -- [((m .|. modm, key), screenWorkspace sc >>= flip whenJust (windows . f))
-    --     | (key, sc) <- zip [xK_w, xK_e, xK_r] [0..]
-    --     , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
+    ++
+   
+    -- mod-alt-{1,2,3}, Switch to physical/Xinerama screens 1, 2, or 3
+    -- mod-shift-alt-{1,2,3}, Move client to screen 1, 2, or 3
+    [((m .|. modm, key), screenWorkspace sc >>= flip whenJust (windows . f))
+        | (key, sc) <- zip [xK_1, xK_2, xK_3] [0..]
+        , (f, m) <- [(W.view, mod1Mask), (W.shift, shiftMask .|. mod1Mask)]]
  
  
 ------------------------------------------------------------------------
@@ -440,7 +464,7 @@ myEventHook = fullscreenEventHook <+> modKeyEvents
 -- It will add EWMH logHook actions to your custom log hook by
 -- combining it with ewmhDesktopsLogHook.
 --
-myLogHook = return ()
+myLogHook = showHideFloats
  
 ------------------------------------------------------------------------
 -- Startup hook
