@@ -1,5 +1,5 @@
 
-import Control.Monad (liftM2, liftM3, foldM, mapM)
+import Control.Monad (liftM2, liftM3, liftM5, foldM, mapM)
 import Data.List
 import Data.Monoid
 import Data.Traversable (traverse)
@@ -18,7 +18,6 @@ import XMonad.Hooks.ManageHelpers
 import XMonad.Layout.NoFrillsDecoration 
 import XMonad.Layout.SimplestFloat
 import XMonad.Layout.PerWorkspace
-import XMonad.Layout.Minimize
 
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
@@ -121,6 +120,7 @@ cautiousRemoveWorkspace = do
     else return ()
 
 -- Hide floating layer if not focussed
+-- see logHook
 
 doIfFloat :: (Window -> X()) -> M.Map Window W.RationalRect -> Window -> X ()
 doIfFloat f floats w = if (M.member w floats) then f w else return ()
@@ -135,10 +135,11 @@ withWindows f = do
 showHideFloats :: X ()
 showHideFloats = do
     (mw, floats, alive) <- gets (liftM3 (,,) W.peek W.floating W.index . windowset)
-    maybe (return ()) (\w -> if (M.member w floats) || not (w `elem` alive)
-                             then spawn "xmessage 'oh dear'" -- withWindows (doIfFloat (sendMessage . RestoreMinimizedWin) floats)
-                             else withWindows (doIfFloat minimizeWindow floats)) mw
-     
+    maybe (return ()) (\w -> if (M.member w floats) 
+                             -- for floats, let modkeyrelease shift master 
+                             then return () 
+                             else withWindows (doIfFloat hide floats)) mw
+    
     
 
 -- Stacking
@@ -151,7 +152,6 @@ setModReleaseCatch = do
 
 changeFocus f = do
     windows f
-    showHideFloats
     setModReleaseCatch
 
 currentLayout :: W.StackSet i l a s sd -> l
@@ -161,8 +161,13 @@ currentNumWins :: W.StackSet i l a s sd -> Int
 currentNumWins = length . W.index 
 
 currentlyShifting = do
-    (ws, l, n) <- gets ((liftM3 (,,) W.currentTag currentLayout currentNumWins) . windowset)
-    return ((ws == dashboardWorkspace && n > 2) || 
+    (ws, l, n, mw, floats) <- gets ((liftM5 (,,,,) W.currentTag 
+                                                   currentLayout 
+                                                   currentNumWins
+                                                   W.peek
+                                                   W.floating) . windowset)
+    return (maybe False (\w -> M.member w floats) mw || 
+            (ws == dashboardWorkspace && n > 2) || 
             ("Float" `isInfixOf` (description l)) ||
             ("Full" `isInfixOf` (description l)))
 
@@ -189,12 +194,6 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- maximise window
     , ((modm, xK_Up), toggleMax)
-
-     -- minimize window
-    , ((modm, xK_Down), withFocused minimizeWindow)
-
-    -- minimize window restore
-    , ((modm .|. shiftMask, xK_Down), sendMessage RestoreNextMinimizedWin)
 
     -- add a tag
     , ((modm, xK_a), createNewWorkspace)
@@ -357,11 +356,10 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 -- The available layouts.  Note that each layout is separated by |||,
 -- which denotes layout choice.
 --
-myLayout = minimize layouts
-    where
-        layouts = onWorkspace fullWorkspace Full $ -- don't decorate full
-                  decoratedWorkspaces ||| Full
-                  
+myLayout = 
+    onWorkspace fullWorkspace Full $ -- don't decorate full
+    decoratedWorkspaces ||| Full
+    where                  
         decoratedWorkspaces = decoration $ 
                               onWorkspace dashboardWorkspace tiled $ 
                               (tiled ||| Mirror tiled ||| simplestFloat)
@@ -472,7 +470,7 @@ myEventHook = modKeyEvents
 -- It will add EWMH logHook actions to your custom log hook by
 -- combining it with ewmhDesktopsLogHook.
 --
-myLogHook = return ()
+myLogHook = showHideFloats
  
 ------------------------------------------------------------------------
 -- Startup hook
