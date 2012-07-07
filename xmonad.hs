@@ -18,13 +18,13 @@ import XMonad.Hooks.ManageHelpers
 import XMonad.Layout.NoFrillsDecoration 
 import XMonad.Layout.SimplestFloat
 import XMonad.Layout.PerWorkspace
+import XMonad.Layout.Fullscreen
 
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
 
 generalWorkspace = "g"
 dashboardWorkspace = "d"
-fullWorkspace = "f"
 
 myActiveColor = "#b6ca8f"
 myActiveFontColor = "white"
@@ -35,7 +35,7 @@ myTerminal      = "urxvt"
 myBorderWidth   = 1
 myModMask       = mod4Mask
 modKeyCode      = 133
-myWorkspaces    = [generalWorkspace, dashboardWorkspace, fullWorkspace]
+myWorkspaces    = [generalWorkspace, dashboardWorkspace]
 myNormalBorderColor = myInactiveColor
 myFocusedBorderColor = myActiveColor
 
@@ -96,16 +96,6 @@ myPP = xmobarPP { ppCurrent = colorActive
                 }
 toggleStrutsKey XConfig {XMonad.modMask = modMask} = (modMask, xK_Tab)
 
--- Fullscreening
-
-toggleMax = withFocused (\w -> windows (\ss ->
-                if M.member w (W.floating ss)
-                then (W.sink w ss)
-                else (W.float w full ss)))
-                where
-                    full = W.RationalRect 0 0 1 1
-
-
 -- Create and destroy workspaces
 
 createNewWorkspace = do
@@ -118,29 +108,6 @@ cautiousRemoveWorkspace = do
     if not (elem curtag myWorkspaces)
     then removeEmptyWorkspace
     else return ()
-
--- Hide floating layer if not focussed
--- see logHook
-
-doIfFloat :: (Window -> X()) -> M.Map Window W.RationalRect -> Window -> X ()
-doIfFloat f floats w = if (M.member w floats) then f w else return ()
-
-withWindows :: (Window -> X ()) -> X ()
-withWindows f = do
-    wins <- gets (W.allWindows . windowset)
-    mapM f wins
-    return ()
-    
-
-showHideFloats :: X ()
-showHideFloats = do
-    (mw, floats, alive) <- gets (liftM3 (,,) W.peek W.floating W.index . windowset)
-    maybe (return ()) (\w -> if (M.member w floats) 
-                             -- for floats, let modkeyrelease shift master 
-                             then return () 
-                             else withWindows (doIfFloat hide floats)) mw
-    
-    
 
 -- Stacking
 
@@ -193,7 +160,10 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm, xK_backslash), spawn $ XMonad.terminal conf)
 
     -- maximise window
-    , ((modm, xK_Up), toggleMax)
+    , ((modm, xK_Up), withFocused (sendMessage . AddFullscreen))
+
+    -- unmaximise window
+    , ((modm, xK_Down), withFocused (sendMessage . RemoveFullscreen))
 
     -- add a tag
     , ((modm, xK_a), createNewWorkspace)
@@ -357,8 +327,7 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 -- which denotes layout choice.
 --
 myLayout = 
-    onWorkspace fullWorkspace Full $ -- don't decorate full
-    decoratedWorkspaces ||| Full
+    fullscreenFocus (decoratedWorkspaces ||| Full)
     where                  
         decoratedWorkspaces = decoration $ 
                               onWorkspace dashboardWorkspace tiled $ 
@@ -405,14 +374,14 @@ myLayout =
 myFullFloats = ["Firefox"]
 myFloats = ["MPlayer", "Gimp", "Skype"]
 myDashboardResources = ["Music", "Mutt", "Irssi"]
-mySpecialWorkspaces = [dashboardWorkspace, fullWorkspace]
+mySpecialWorkspaces = [dashboardWorkspace]
 myNoDash = ["Evince","Plugin-container"]
 
-myManageHook = toWS <+> setFloat
+myManageHook = fullscreenManageHook <+> toWS <+> setFloat
 
 setFloat = composeAll . concat $
     [ [ className =? c --> doFloat | c <- myFloats ]
-    -- , [ className =? c --> doFullFloat | c <- myFullFloats ]
+    , [ className =? c --> doFullFloat | c <- myFullFloats ]
     , [ isFullscreen                  --> doFullFloat
       , resource  =? "desktop_window" --> doIgnore
       , resource  =? "kdesktop"       --> doIgnore ] ]
@@ -420,7 +389,6 @@ setFloat = composeAll . concat $
 
 toWS = composeOne . concat $ 
            [ [ resource =? t -?> doViewShift dashboardWorkspace | t <- myDashboardResources ] 
-           , [ className =? t -?> doViewShift fullWorkspace | t <- myFullFloats ]
            , [ className =? t -?> doAvoidList [dashboardWorkspace] | t <- myNoDash ]
            , [ fmap Just (doAvoidList mySpecialWorkspaces) ] ]
            where 
@@ -455,7 +423,7 @@ modKeyEvents (KeyEvent {ev_event_type = t, ev_keycode = code})
   | otherwise = return (All True)
 modKeyEvents _ = return (All True)
 
-myEventHook = modKeyEvents
+myEventHook = fullscreenEventHook <+> modKeyEvents
 
 
 ------------------------------------------------------------------------
@@ -470,7 +438,7 @@ myEventHook = modKeyEvents
 -- It will add EWMH logHook actions to your custom log hook by
 -- combining it with ewmhDesktopsLogHook.
 --
-myLogHook = showHideFloats
+myLogHook = return ()
  
 ------------------------------------------------------------------------
 -- Startup hook
