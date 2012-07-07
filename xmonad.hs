@@ -148,7 +148,6 @@ onModRelease = do
       else return ()
       return (All True)
 
-
 -- Keys
 --
 -- Note additionalKeys after defaultConfig.  TODO: change all to EZConfig
@@ -160,7 +159,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm, xK_backslash), spawn $ XMonad.terminal conf)
 
     -- maximise window
-    , ((modm, xK_Up), withFocused (sendMessage . AddFullscreen))
+    , ((modm, xK_Up),  withFocused (sendMessage . AddFullscreen))
 
     -- unmaximise window
     , ((modm, xK_Down), withFocused (sendMessage . RemoveFullscreen))
@@ -371,7 +370,7 @@ myLayout =
 -- To match on the WM_NAME, you can use 'title' in the same way that
 -- 'className' and 'resource' are used below.
 
-myFullFloats = ["Firefox"]
+myFullscreens = ["Firefox"]
 myFloats = ["MPlayer", "Gimp", "Skype"]
 myDashboardResources = ["Music", "Mutt", "Irssi"]
 mySpecialWorkspaces = [dashboardWorkspace]
@@ -381,10 +380,13 @@ myManageHook = fullscreenManageHook <+> toWS <+> setFloat
 
 setFloat = composeAll . concat $
     [ [ className =? c --> doFloat | c <- myFloats ]
-    , [ className =? c --> doFullFloat | c <- myFullFloats ]
-    , [ isFullscreen                  --> doFullFloat
+    , [ className =? c --> doFullscreen | c <- myFullscreens ]
+    , [ isFullscreen                  --> doFullscreen
       , resource  =? "desktop_window" --> doIgnore
       , resource  =? "kdesktop"       --> doIgnore ] ]
+    where
+        doFullscreen = ask >>= \w -> liftX (fullScreen w) >> doF id
+        fullScreen = sendMessage . AddFullscreen
 
 
 toWS = composeOne . concat $ 
