@@ -18,7 +18,6 @@ import XMonad.Hooks.ManageHelpers
 import XMonad.Layout.NoFrillsDecoration 
 import XMonad.Layout.SimplestFloat
 import XMonad.Layout.PerWorkspace
-import XMonad.Layout.Fullscreen
 
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
@@ -109,6 +108,15 @@ cautiousRemoveWorkspace = do
     then removeEmptyWorkspace
     else return ()
 
+-- Maximising
+
+toggleMax = withFocused (\w -> windows (\ss ->
+                if M.member w (W.floating ss)
+                then (W.sink w ss)
+                else (W.float w full ss)))
+                where
+                    full = W.RationalRect 0 0 1 1
+
 
 
 -- Show hide floats so we can see tiles beneath.  See also stacking and logHook.
@@ -125,12 +133,16 @@ withWindows f = do
 
 showHideFloats :: X ()
 showHideFloats = do
-    (mw, floats, alive) <- gets (liftM3 (,,) W.peek W.floating W.index . windowset)
+    (mw, floats) <- gets (liftM2 (,) W.peek W.floating . windowset)
     maybe (return ()) (\w -> if (M.member w floats) 
-                             -- for floats, let modkeyrelease shift master 
-                             then return () 
+                             then return () -- XMonad unhides automatically
                              else withWindows (doIfFloat hide floats)) mw
 
+raiseFocused :: X ()
+raiseFocused = do
+    XConf { display = disp } <- ask
+    mw <- gets (W.peek . windowset)
+    maybe (return ()) (io . (raiseWindow disp)) mw
 
 
 
@@ -141,6 +153,7 @@ setModReleaseCatch = do
     XConf { theRoot = root, display = disp } <- ask 
     io $ grabKeyboard disp root False grabModeAsync grabModeAsync currentTime
     return ()
+
 
 changeFocus f = do
     windows f
@@ -184,10 +197,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm, xK_backslash), spawn $ XMonad.terminal conf)
 
     -- maximise window
-    , ((modm, xK_Up),  withFocused (sendMessage . AddFullscreen))
-
-    -- unmaximise window
-    , ((modm, xK_Down), withFocused (sendMessage . RemoveFullscreen))
+    , ((modm, xK_Up), toggleMax)
 
     -- add a tag
     , ((modm, xK_a), createNewWorkspace)
@@ -350,7 +360,7 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 -- which denotes layout choice.
 --
 myLayout = 
-    fullscreenFocus (decoratedWorkspaces ||| Full)
+    decoratedWorkspaces ||| Full
     where                  
         decoratedWorkspaces = decoration $ 
                               onWorkspace dashboardWorkspace tiled $ 
@@ -400,17 +410,14 @@ myDashboardResources = ["Music", "Mutt", "Irssi"]
 mySpecialWorkspaces = [dashboardWorkspace]
 myNoDash = ["Evince","Plugin-container"]
 
-myManageHook = fullscreenManageHook <+> toWS <+> setFloat
+myManageHook = toWS <+> setFloat
 
 setFloat = composeAll . concat $
     [ [ className =? c --> doFloat | c <- myFloats ]
-    , [ className =? c --> doFullscreen | c <- myFullscreens ]
-    , [ isFullscreen                  --> doFullscreen
+    , [ className =? c --> doFullFloat | c <- myFullscreens ]
+    , [ isFullscreen                  --> doFullFloat
       , resource  =? "desktop_window" --> doIgnore
       , resource  =? "kdesktop"       --> doIgnore ] ]
-    where
-        doFullscreen = ask >>= \w -> liftX (fullScreen w) >> doF id
-        fullScreen = sendMessage . AddFullscreen
 
 
 toWS = composeOne . concat $ 
@@ -449,7 +456,7 @@ modKeyEvents (KeyEvent {ev_event_type = t, ev_keycode = code})
   | otherwise = return (All True)
 modKeyEvents _ = return (All True)
 
-myEventHook = fullscreenEventHook <+> modKeyEvents
+myEventHook = modKeyEvents
 
 
 ------------------------------------------------------------------------
@@ -464,7 +471,7 @@ myEventHook = fullscreenEventHook <+> modKeyEvents
 -- It will add EWMH logHook actions to your custom log hook by
 -- combining it with ewmhDesktopsLogHook.
 --
-myLogHook = showHideFloats
+myLogHook = raiseFocused <+> showHideFloats
  
 ------------------------------------------------------------------------
 -- Startup hook
