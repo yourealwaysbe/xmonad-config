@@ -408,7 +408,6 @@ myFullscreens = ["Firefox"]
 myFloats = ["MPlayer", "Gimp", "Skype"]
 myDashboardResources = ["Music", "Mutt", "Irssi"]
 mySpecialWorkspaces = [dashboardWorkspace]
-myNoDash = ["Evince","Plugin-container"]
 
 myManageHook = toWS <+> setFloat
 
@@ -422,18 +421,17 @@ setFloat = composeAll . concat $
 
 toWS = composeOne . concat $ 
            [ [ resource =? t -?> doViewShift dashboardWorkspace | t <- myDashboardResources ] 
-           , [ className =? t -?> doAvoidList [dashboardWorkspace] | t <- myNoDash ]
-           , [ fmap Just (doAvoidList mySpecialWorkspaces) ] ]
+           , [ fmap Just doAvoidSpecial ] ]
            where 
                doViewShift = doF . viewShift
                viewShift = liftM2 (.) W.greedyView W.shift
-               doAvoidList l = doF (avoidSpecial l)
-               avoidSpecial l ss = viewShift ws ss
-                              where
-                                  curws = W.currentTag ss
-                                  ws = if (curws `elem` l)
-                                       then generalWorkspace
-                                       else curws
+               doAvoidSpecial = doF avoidSpecial 
+               avoidSpecial ss = viewShift ws ss
+                                 where
+                                     curws = W.currentTag ss
+                                     ws = if (curws `elem` mySpecialWorkspaces)
+                                          then generalWorkspace
+                                          else curws
 
 
 
