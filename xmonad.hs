@@ -86,13 +86,22 @@ myBar = "xmobar " ++
         "-f '" ++ myFont ++ "' " ++
         "-t '%StdinReader%}{%date%'"
 
+layoutToString :: String -> String
+layoutToString d = concatMap doXY layouts
+    where
+        doXY (l, s) = if l `isInfixOf` d then s else ""
+        layouts = [("Tall", "[T]"), 
+                   ("Mirror", "'"), 
+                   ("Float", "[F]"), 
+                   ("Full", "[ ]")]
+
 myPP = xmobarPP { ppCurrent = colorActive
                 , ppHidden = colorInactive
                 , ppHiddenNoWindows = colorInactive
                 , ppWsSep = colorInactive " "
                 , ppTitle = \w -> "" -- xmobarColor myActiveFontColor myActiveColor
                 , ppSep = colorInactive " "
-                , ppLayout = colorInactive
+                , ppLayout = colorInactive . layoutToString
                 , ppExtras = [ logWindows ]
                 }
 toggleStrutsKey XConfig {XMonad.modMask = modMask} = (modMask, xK_Tab)
