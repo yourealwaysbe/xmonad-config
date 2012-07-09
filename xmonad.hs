@@ -12,6 +12,7 @@ import XMonad.Util.Loggers
 import XMonad.Util.NamedWindows (getName)
 import XMonad.Util.Themes
 import XMonad.Util.EZConfig
+import XMonad.Util.XUtils 
 import XMonad.Actions.CycleWS
 import XMonad.Actions.DynamicWorkspaces
 import XMonad.Hooks.ManageHelpers
@@ -21,6 +22,7 @@ import XMonad.Layout.PerWorkspace
 
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
+import qualified Data.Set        as S
 
 generalWorkspace = "g"
 dashboardWorkspace = "d"
@@ -117,30 +119,54 @@ toggleMax = withFocused (\w -> windows (\ss ->
                 where
                     full = W.RationalRect 0 0 1 1
 
+modifyRect :: (Rectangle -> Rectangle) -> Window -> X ()
+modifyRect rmod w = do
+    disp <- asks display
+    wa <- io $ getWindowAttributes disp w
+    tileWindow w (rmod (Rectangle (fi $ wa_x wa) 
+                                  (fi $ wa_y wa)
+                                  ((fi $ wa_width wa) + (fi 2*myBorderWidth))
+                                  ((fi $ wa_height wa) + (fi 2*myBorderWidth))))
 
+
+floatsAvoidStruts :: X ()
+floatsAvoidStruts = do
+        XConf { display = disp, theRoot = rootw } <- ask
+        l <- gets (currentLayout . windowset)
+        if ("AvoidStruts (fromList [U,D,R,L])" `isInfixOf` (show l))
+        then do {
+            rmod <- calcGap (S.fromList [U,D,L,R]);
+            withFloats $ modifyRect rmod
+        } else return ()
 
 -- Show hide floats so we can see tiles beneath.  See also stacking and logHook.
 
-doIfFloat :: (Window -> X()) -> M.Map Window W.RationalRect -> Window -> X ()
-doIfFloat f floats w = if (M.member w floats) then f w else return ()
+doIf :: (Window -> Bool) -> (Window -> X()) -> Window -> X ()
+doIf c f w = if c w then f w else return ()
 
 withWindows :: (Window -> X ()) -> X ()
 withWindows f = do
     wins <- gets (W.allWindows . windowset)
     mapM f wins
     return ()
-    
 
-showHideFloats :: X ()
-showHideFloats = do
+withFloats :: (Window -> X ()) -> X ()
+withFloats f = do
+    floats <- gets (W.floating . windowset)
+    withWindows (doIf (flip M.member floats) f)
+
+hideFloats :: X ()
+hideFloats = do
+    disp  <- asks display
     (mw, floats) <- gets (liftM2 (,) W.peek W.floating . windowset)
     maybe (return ()) (\w -> if (M.member w floats) 
-                             then return () -- XMonad unhides automatically
-                             else withWindows (doIfFloat hide floats)) mw
+                             then return () -- let raiseFocused deal with it 
+                             else withWindows (doIf (flip M.member floats) 
+                                                    hide)) mw
 
 raiseFocused :: X ()
 raiseFocused = do
-    XConf { display = disp } <- ask
+    disp <- asks display
     mw <- gets (W.peek . windowset)
     maybe (return ()) (io . (raiseWindow disp)) mw
 
@@ -198,6 +224,8 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- maximise window
     , ((modm, xK_Up), toggleMax)
+
+    , ((modm, xK_y), withFocused $ flip setWMState withdrawnState)
 
     -- add a tag
     , ((modm, xK_a), createNewWorkspace)
@@ -469,7 +497,7 @@ myEventHook = modKeyEvents
 -- It will add EWMH logHook actions to your custom log hook by
 -- combining it with ewmhDesktopsLogHook.
 --
-myLogHook = raiseFocused <+> showHideFloats
+myLogHook = floatsAvoidStruts <+> raiseFocused <+> hideFloats
  
 ------------------------------------------------------------------------
 -- Startup hook
