@@ -1,5 +1,5 @@
 
-import Control.Monad (liftM2, liftM3, liftM5, foldM, mapM)
+import Control.Monad (liftM2, liftM3, liftM5, foldM, mapM, msum)
 import Data.List
 import Data.Monoid
 import Data.Traversable (traverse)
@@ -61,24 +61,43 @@ colorInactive = xmobarColor myInactiveFontColor myInactiveColor
 
 
 
--- max length of win title on bar (better if func of space vs. windows, but hey)
-myTitleLength = 200
+-- max length of win titles on bar 
+myTitleLength = 130
 
 -- Get a list of open windows for bar
 logWindows :: Logger
 logWindows = withWindowSet getWindowLog
 
+
+-- getTitle :: Window -> X String
+-- concatMap :: (Window -> String) -> [Window] -> String
+-- msum :: [m a] -> m a
+
+-- can we use concatMap
+-- getWindowLog :: WindowSet -> X (Maybe String)
+-- getWindowLog ws =
+--     fmap Just $  msum . map getTitle (W.index ws)
+--     where
+--         curw = W.peek ws
+--         getTitle w = let isCur = (Just w == curw) in
+--                      fmap (formatTitle isCur . show) $ getName w 
+--         formatTitle f s = let s' = take myTitleLength s in 
+--                           let color = if f then colorActive 
+--                                            else colorInactive in
+--                           " " ++ color s' ++ " "
+-- 
 getWindowLog :: WindowSet -> X (Maybe String)
-getWindowLog ws =
-    fmap Just $ (foldM addTitle "") (W.index ws)
+getWindowLog ws = do
+    n <- gets (currentNumWins . windowset)
+    fmap Just $ foldM (addTitle (myTitleLength `div` n)) "" (W.index ws)
     where
         curw = W.peek ws
-        addTitle s w = let isCur = (Just w == curw) in
-                       fmap ((s ++) . formatTitle isCur . show) $ getName w 
-        formatTitle f s = let s' = take myTitleLength s in 
-                          let color = if f then colorActive 
-                                           else colorInactive in
-                          " " ++ color s' ++ " "
+        addTitle len s w = let isCur = (Just w == curw) in
+                           fmap ((s ++) . formatTitle len isCur . show) $ getName w 
+        formatTitle len cur s = let s' = take (len - 2) s in 
+                                let color = if cur then colorActive 
+                                                   else colorInactive in
+                                " " ++ color s' ++ " "
 
 myBar = "xmobar " ++
         "-B '" ++ myInactiveColor ++ "' " ++
@@ -90,10 +109,10 @@ layoutToString :: String -> String
 layoutToString d = concatMap doXY layouts
     where
         doXY (l, s) = if l `isInfixOf` d then s else ""
-        layouts = [("Tall", "[T]"), 
+        layouts = [("Tall", ".t."), 
                    ("Mirror", "'"), 
-                   ("Float", "[F]"), 
-                   ("Full", "[ ]")]
+                   ("Float", ".f."), 
+                   ("Full", ". .")]
 
 myPP = xmobarPP { ppCurrent = colorActive
                 , ppHidden = colorInactive
@@ -164,6 +183,7 @@ withFloats f = do
     floats <- gets (W.floating . windowset)
     withWindows (doIf (flip M.member floats) f)
 
+
 hideFloats :: X ()
 hideFloats = do
     disp  <- asks display
@@ -231,10 +251,11 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     , ((modm, xK_backslash), spawn $ XMonad.terminal conf)
 
+    -- unmanage window
+    , ((modm, xK_u), withFocused unmanage)
+
     -- maximise window
     , ((modm, xK_Up), toggleMax)
-
-    , ((modm, xK_y), withFocused $ flip setWMState withdrawnState)
 
     -- add a tag
     , ((modm, xK_a), createNewWorkspace)
