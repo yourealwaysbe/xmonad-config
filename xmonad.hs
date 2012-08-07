@@ -51,7 +51,9 @@ myFont = "xft: Liberation Mono" ++
          ":pixelsize=13" ++
          ":antialiasing=true" ++
          ":hinting=true" ++
-         ":rgba=rgb2" ++
+         ":autohinting=true" ++
+         ":hintstyle=hintfull" ++
+         ":rgba=rgb" ++
          ":lcdfilter=lcdnone"
 
 -- Bar
@@ -298,6 +300,9 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- stop mpd
     , ((modm, xK_s), spawn "mpc stop")
+
+    -- evince
+    , ((modm .|. shiftMask, xK_e), spawn "evince")
 
     -- launch dmenu
     -- , ((modm, xK_p), spawn "exe=`dmenu_path | dmenu` && eval \"exec $exe\"")
