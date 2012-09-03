@@ -189,10 +189,10 @@ withFloats f = do
 hideFloats :: X ()
 hideFloats = do
     disp  <- asks display
-    (mw, floats) <- gets (liftM2 (,) W.peek W.floating . windowset)
+    (mw, floats, current) <- gets (liftM3 (,,) W.peek W.floating W.index . windowset)
     maybe (return ()) (\w -> if (M.member w floats) 
                              then return () -- let raiseFocused deal with it 
-                             else withWindows (doIf (flip M.member floats) 
+                             else withWindows (doIf (liftM2 (&&) (flip M.member floats) (flip elem current))
                                                     hide)) mw
 
 raiseFocused :: X ()
@@ -251,6 +251,8 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- launch a terminal
     [ ((modm, xK_Return), spawn $ XMonad.terminal conf)
 
+    , ((modm, xK_y), setLayout $ Layout Full)
+
     , ((modm, xK_backslash), spawn $ XMonad.terminal conf)
 
     -- unmanage window
@@ -277,8 +279,14 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- prev tag
     , ((modm, xK_comma), prevWS)
 
-    -- prev tag
+    -- next tag
     , ((modm, xK_period), nextWS)
+
+    -- prev screen
+    , ((modm .|. mod1Mask, xK_comma), prevScreen)
+
+    -- next screen
+    , ((modm .|. mod1Mask, xK_period), nextScreen)
 
     -- wifi
     , ((modm, xK_w), spawn "urxvt -T netcfg -e sudo wifi-select wlan0")
@@ -472,7 +480,14 @@ myFloats = ["MPlayer", "Gimp", "Skype"]
 myDashboardResources = ["Music", "Mutt", "Irssi"]
 mySpecialWorkspaces = [dashboardWorkspace]
 
-myManageHook = toWS <+> setFloat
+myManageHook = toWS <+> setFloat 
+
+-- makeFull = do
+--     n <- gets (length . W.index . windowset)
+--     if (n > 2) then
+--         setLayout (Layout Full)
+--     else return ()
+
 
 setFloat = composeAll . concat $
     [ [ className =? c --> doFloat | c <- myFloats ]
