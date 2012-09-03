@@ -190,10 +190,11 @@ hideFloats :: X ()
 hideFloats = do
     disp  <- asks display
     (mw, floats, current) <- gets (liftM3 (,,) W.peek W.floating W.index . windowset)
-    maybe (return ()) (\w -> if (M.member w floats) 
-                             then return () -- let raiseFocused deal with it 
-                             else withWindows (doIf (liftM2 (&&) (flip M.member floats) (flip elem current))
-                                                    hide)) mw
+    let floatOnCur = liftM2 (&&) (flip M.member floats) (flip elem current) 
+    let doHide w = if (M.member w floats) 
+                   then return () -- let raiseFocused deal with it 
+                   else withWindows (doIf floatOnCur hide)
+    maybe (return ()) doHide mw
 
 raiseFocused :: X ()
 raiseFocused = do
