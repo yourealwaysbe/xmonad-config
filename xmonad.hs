@@ -278,10 +278,10 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm, xK_f), spawn "firefox")
 
     -- prev tag
-    , ((modm, xK_j), prevWS)
+    , ((modm, xK_comma), prevWS)
 
     -- next tag
-    , ((modm, xK_k), nextWS)
+    , ((modm, xK_period), nextWS)
 
     -- prev screen
     , ((modm .|. mod1Mask, xK_comma), prevScreen)
