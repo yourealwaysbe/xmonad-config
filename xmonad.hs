@@ -185,16 +185,6 @@ withFloats f = do
     floats <- gets (W.floating . windowset)
     withWindows (doIf (flip M.member floats) f)
 
--- hideFloats :: X ()
--- hideFloats = do
---     disp  <- asks display
---     (mw, floats, current) <- gets (liftM3 (,,) W.peek W.floating W.index . windowset)
---     let floatOnCur = liftM2 (&&) (flip M.member floats) (flip elem current) 
---     let doHide w = if (M.member w floats) 
---                    then return () -- let raiseFocused deal with it 
---                    else withWindows (doIf floatOnCur hide)
---     maybe (return ()) doHide mw
-
 hideFloats :: X ()
 hideFloats = do
     let getScreens = liftM2 (:) W.current W.visible
@@ -210,8 +200,6 @@ hideFloats = do
                 return ()
     mapM doStack stacks
     return ()
-
-            
 
 raiseFocused :: X ()
 raiseFocused = do
