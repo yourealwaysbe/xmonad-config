@@ -168,7 +168,7 @@ floatsAvoidStruts = do
 -- Show hide floats so we can see tiles beneath.  See also stacking and logHook.
 
 doIf :: (Window -> Bool) -> (Window -> X()) -> Window -> X ()
-doIf c f = liftM2 when c f 
+doIf = liftM2 when 
 
 withWindows :: (Window -> X ()) -> X ()
 withWindows f = do
