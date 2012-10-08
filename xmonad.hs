@@ -1,5 +1,5 @@
 
-import Control.Monad (liftM2, liftM3, liftM5, foldM, mapM_, msum)
+import Control.Monad (liftM2, liftM3, liftM5, foldM, mapM_, msum, when)
 import Data.List as L
 import Data.Monoid
 import Data.Traversable (traverse)
@@ -136,9 +136,7 @@ createNewWorkspace = do
         
 cautiousRemoveWorkspace = do
     curtag <- gets (W.currentTag . windowset)
-    if not (elem curtag myWorkspaces)
-    then removeEmptyWorkspace
-    else return ()
+    when (not (elem curtag myWorkspaces)) removeEmptyWorkspace
 
 -- Maximising
 
@@ -163,16 +161,14 @@ floatsAvoidStruts :: X ()
 floatsAvoidStruts = do
         XConf { display = disp, theRoot = rootw } <- ask
         l <- gets (currentLayout . windowset)
-        if ("AvoidStruts (fromList [U,D,R,L])" `isInfixOf` (show l))
-        then do {
+        when ("AvoidStruts (fromList [U,D,R,L])" `isInfixOf` (show l)) $ do 
             rmod <- calcGap (S.fromList [U,D,L,R]);
             withFloats $ modifyRect rmod
-        } else return ()
 
 -- Show hide floats so we can see tiles beneath.  See also stacking and logHook.
 
 doIf :: (Window -> Bool) -> (Window -> X()) -> Window -> X ()
-doIf c f w = if c w then f w else return ()
+doIf c f = liftM2 when c f 
 
 withWindows :: (Window -> X ()) -> X ()
 withWindows f = do
@@ -188,13 +184,9 @@ hideFloats :: X ()
 hideFloats = do
     floats <- gets (W.floating . windowset)
     let isFloat = flip M.member floats
-    let doStack Nothing = return ()
-        doStack (Just s) = 
-            if isFloat (W.focus s)
-            then return () -- xmonad magically raises floats (or annoyingly)
-            else do 
-                mapM_ (doIf isFloat hide) (W.up s)
-                mapM_ (doIf isFloat hide) (W.down s)
+    let doStack = flip whenJust $ \s ->
+            when ((not . isFloat . W.focus) s) $
+                 mapM_ (doIf isFloat hide) $ (W.up s) ++ (W.down s)
     let getScreens = liftM2 (:) W.current W.visible
     withWindowSet $ mapM_ (doStack . W.stack . W.workspace) . getScreens 
 
@@ -202,7 +194,7 @@ raiseFocused :: X ()
 raiseFocused = do
     disp <- asks display
     mw <- gets (W.peek . windowset)
-    maybe (return ()) (io . (raiseWindow disp)) mw
+    whenJust mw (io . (raiseWindow disp))
 
 
 
@@ -241,9 +233,7 @@ onModRelease = do
       XConf { display = disp, theRoot = root } <- ask
       io $ ungrabKeyboard disp currentTime
       shift <- currentlyShifting
-      if shift
-      then windows W.shiftMaster
-      else return ()
+      when shift $ windows W.shiftMaster
       return (All True)
 
 -- Keys
