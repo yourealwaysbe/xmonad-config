@@ -1,6 +1,6 @@
 
 import Control.Monad (liftM2, liftM3, liftM5, foldM, mapM, msum)
-import Data.List
+import Data.List as L
 import Data.Monoid
 import Data.Traversable (traverse)
 import System.Exit
@@ -185,16 +185,33 @@ withFloats f = do
     floats <- gets (W.floating . windowset)
     withWindows (doIf (flip M.member floats) f)
 
+-- hideFloats :: X ()
+-- hideFloats = do
+--     disp  <- asks display
+--     (mw, floats, current) <- gets (liftM3 (,,) W.peek W.floating W.index . windowset)
+--     let floatOnCur = liftM2 (&&) (flip M.member floats) (flip elem current) 
+--     let doHide w = if (M.member w floats) 
+--                    then return () -- let raiseFocused deal with it 
+--                    else withWindows (doIf floatOnCur hide)
+--     maybe (return ()) doHide mw
 
 hideFloats :: X ()
 hideFloats = do
-    disp  <- asks display
-    (mw, floats, current) <- gets (liftM3 (,,) W.peek W.floating W.index . windowset)
-    let floatOnCur = liftM2 (&&) (flip M.member floats) (flip elem current) 
-    let doHide w = if (M.member w floats) 
-                   then return () -- let raiseFocused deal with it 
-                   else withWindows (doIf floatOnCur hide)
-    maybe (return ()) doHide mw
+    let getScreens = liftM2 (:) W.current W.visible
+    let getStacks = L.map (W.stack . W.workspace) . getScreens
+    (stacks, floats) <- gets (liftM2 (,) getStacks W.floating . windowset)
+    let doStack Nothing = return ()
+        doStack (Just s) = 
+            if (M.member (W.focus s) floats) 
+            then return () -- xmonad magically raises floats (or annoyingly)
+            else do 
+                mapM (doIf (flip M.member floats) hide) (W.up s)
+                mapM (doIf (flip M.member floats) hide) (W.down s)
+                return ()
+    mapM doStack stacks
+    return ()
+
+            
 
 raiseFocused :: X ()
 raiseFocused = do
