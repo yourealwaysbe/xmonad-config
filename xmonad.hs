@@ -167,7 +167,8 @@ floatsAvoidStruts = do
 
 -- Show hide floats so we can see tiles beneath.  See also stacking and logHook.
 
-doIf :: (Window -> Bool) -> (Window -> X()) -> Window -> X ()
+-- doIf :: (Window -> Bool) -> (Window -> X()) -> Window -> X ()
+-- and others...
 doIf = liftM2 when 
 
 withWindows :: (Window -> X ()) -> X ()
@@ -184,11 +185,13 @@ hideFloats :: X ()
 hideFloats = do
     floats <- gets (W.floating . windowset)
     let isFloat = flip M.member floats
-    let doStack = flip whenJust $ \s ->
-            when ((not . isFloat . W.focus) s) $
-                 mapM_ (doIf isFloat hide) $ (W.up s) ++ (W.down s)
+    let getOtherWins = liftM2 (++) W.up W.down
+    let doStack = flip whenJust $ 
+            liftM2 when (not . isFloat . W.focus)
+                        (mapM_ (doIf isFloat hide) . getOtherWins)
     let getScreens = liftM2 (:) W.current W.visible
-    withWindowSet $ mapM_ (doStack . W.stack . W.workspace) . getScreens 
+    let getStack = W.stack . W.workspace
+    withWindowSet $ mapM_ (doStack . getStack) . getScreens 
 
 raiseFocused :: X ()
 raiseFocused = do
