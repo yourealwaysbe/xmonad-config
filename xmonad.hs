@@ -130,10 +130,14 @@ toggleStrutsKey XConfig {XMonad.modMask = modMask} = (modMask, xK_Tab)
 -- Create and destroy workspaces
 
 createNewWorkspace = do
-    ws <- gets (W.workspaces . windowset)
-    addWorkspace ("w" ++ (show (length ws)))
-    sendMessage ToggleStruts
-        
+    withWindowSet $ \ws -> do
+        let nameWS n = let name = "w" ++ (show n) in
+                       if (W.tagMember name ws)
+                       then nameWS (n+1) 
+                       else name 
+        addWorkspace (nameWS 0)
+        sendMessage ToggleStruts
+                    
 cautiousRemoveWorkspace = do
     curtag <- gets (W.currentTag . windowset)
     when (not (elem curtag myWorkspaces)) removeEmptyWorkspace
