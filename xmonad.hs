@@ -271,7 +271,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm, xK_g), spawn "gvim")
 
     -- launch skype
-    , ((modm, xK_t), spawn "start-skype")
+    , ((modm, xK_t), spawn "skype")
 
      -- launch firefox
     , ((modm, xK_f), spawn "firefox")
@@ -295,13 +295,13 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm, xK_e), spawn "urxvt -T Mutt -name Mutt -e /home/matt/bin/start-mutt")
 
     -- music
-    , ((modm, xK_m), spawn "urxvt -T Music -name Music -e /home/matt/bin/start-music")
+    , ((modm, xK_m), spawn "urxvt -T Music -name Music -e /home/matt/bin/start-music.sh")
 
     -- irssi
     , ((modm, xK_i), spawn "urxvt -T Irssi -name Irssi -e /home/matt/bin/start_irssi")
 
     -- chilon radio
-    , ((modm, xK_c), spawn "urxvt -T Chilon Radio -name Music -e /home/matt/bin/chilonmpc")
+    , ((modm, xK_c), spawn "urxvt -T Chilon Radio -name Music -e /home/matt/bin/chilon-mpc.sh")
 
     -- pause mpd
     , ((modm, xK_p), spawn "mpc toggle")
@@ -397,6 +397,8 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 ------------------------------------------------------------------------
 -- Mouse bindings: default actions bound to mouse events
 
+button9     =  9 :: Button
+
 myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
  
     -- mod-button1, Set the window to floating mode and move by dragging
@@ -411,6 +413,7 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
                                        >> windows W.shiftMaster))
  
     -- you may also bind events to the mouse scroll wheel (button4 and button5)
+    , ((0, button9), (\w -> nextWS)) 
     ]
  
 ------------------------------------------------------------------------
