@@ -295,13 +295,13 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm, xK_e), spawn "urxvt -T Mutt -name Mutt -e /home/matt/bin/start-mutt")
 
     -- music
-    , ((modm, xK_m), spawn "urxvt -T Music -name Music -e /home/matt/bin/start-music")
+    , ((modm, xK_m), spawn "urxvt -T Music -name Music -e /home/matt/bin/start-music.sh")
 
     -- irssi
     , ((modm, xK_i), spawn "urxvt -T Irssi -name Irssi -e /home/matt/bin/start_irssi")
 
     -- chilon radio
-    , ((modm, xK_c), spawn "urxvt -T Chilon Radio -name Music -e /home/matt/bin/chilonmpc")
+    , ((modm, xK_c), spawn "urxvt -T Chilon Radio -name Music -e /home/matt/bin/chilon-mpc.sh")
 
     -- pause mpd
     , ((modm, xK_p), spawn "mpc toggle")
@@ -475,8 +475,8 @@ myLayout =
 -- To match on the WM_NAME, you can use 'title' in the same way that
 -- 'className' and 'resource' are used below.
 
-myFullscreens = ["Firefox"]
-myFloats = ["MPlayer", "Gimp", "Skype"]
+myFullscreens = ["Firefox","Viking"]
+myFloats = ["MPlayer", "Gimp", "Skype", "Eclipse"]
 myDashboardResources = ["Music", "Mutt", "Irssi"]
 mySpecialWorkspaces = [dashboardWorkspace]
 
