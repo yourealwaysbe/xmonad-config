@@ -270,6 +270,9 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- launch gvim
     , ((modm, xK_g), spawn "gvim")
 
+    -- launch gvim
+    , ((modm .|. shiftMask, xK_g), spawn "gimp")
+
     -- launch skype
     , ((modm, xK_t), spawn "skype")
 
@@ -533,9 +536,12 @@ modKeyEvents :: Event -> X All
 modKeyEvents (KeyEvent {ev_event_type = t, ev_keycode = code}) 
   | (t == keyRelease) && (code == modKeyCode) = onModRelease
   | otherwise = return (All True)
-modKeyEvents _ = return (All True)
+modKeyEvents e = --do
+    -- spawn ("echo " ++ (show e) ++ " >> /home/matt/log")
+    return (All True)
 
-myEventHook = modKeyEvents
+
+myEventHook = modKeyEvents 
 
 
 ------------------------------------------------------------------------
