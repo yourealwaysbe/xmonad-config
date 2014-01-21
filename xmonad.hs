@@ -1,5 +1,5 @@
 
-import Control.Monad (liftM2, liftM3, liftM5, foldM, mapM_, msum, when)
+import Control.Monad (liftM, liftM2, liftM3, liftM5, foldM, mapM_, msum, when)
 import Data.List as L
 import Data.Monoid
 import Data.Traversable (traverse)
@@ -481,12 +481,12 @@ myLayout =
 -- To match on the WM_NAME, you can use 'title' in the same way that
 -- 'className' and 'resource' are used below.
 
-myFullscreens = ["Firefox"]
-myFloats = ["MPlayer", "Gimp", "Skype", "Eclipse", "Viking"]
+myFullscreens = ["Firefox", "Viking"]
+myFloats = ["MPlayer", "Gimp", "Skype", "Eclipse"]
 myDashboardResources = ["Music", "Mutt", "Irssi"]
 mySpecialWorkspaces = [dashboardWorkspace]
 
-myManageHook = toWS <+> setFloat 
+myManageHook = toWS <+> setFloat <+> setIgnore
 
 -- makeFull = do
 --     n <- gets (length . W.index . windowset)
@@ -494,13 +494,18 @@ myManageHook = toWS <+> setFloat
 --         setLayout (Layout Full)
 --     else return ()
 
+-- not lifted to monad (like <&&> and <||> for log ops in composeAll/One)
+-- notM :: Monad m => m Bool -> m Bool
+-- notM = liftM not
 
-setFloat = composeAll . concat $
-    [ [ className =? c --> doFloat | c <- myFloats ]
-    , [ className =? c --> doFullFloat | c <- myFullscreens ]
-    , [ isFullscreen                  --> doFullFloat
-      , resource  =? "desktop_window" --> doIgnore
-      , resource  =? "kdesktop"       --> doIgnore ] ]
+setFloat = composeOne . concat $
+    [ [ isDialog -?> doFloat ]
+    , [ className =? c -?> doFloat | c <- myFloats ]
+    , [ className =? c -?> doFullFloat | c <- myFullscreens ]
+    , [ isFullscreen -?> doFullFloat ] ]
+
+setIgnore = composeAll [ resource  =? "desktop_window" --> doIgnore
+                       , resource  =? "kdesktop"       --> doIgnore ] 
 
 
 toWS = composeOne . concat $ 
