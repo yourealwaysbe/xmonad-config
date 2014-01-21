@@ -315,6 +315,9 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- evince
     , ((modm .|. shiftMask, xK_e), spawn "evince")
 
+    -- viking
+    , ((modm, xK_v), spawn "viking /home/matt/cycling/planning.vik")
+
     -- launch dmenu
     -- , ((modm, xK_p), spawn "exe=`dmenu_path | dmenu` && eval \"exec $exe\"")
  
@@ -482,7 +485,7 @@ myLayout =
 -- 'className' and 'resource' are used below.
 
 myFullscreens = ["Firefox","Viking"]
-myFloats = ["MPlayer", "Gimp", "Skype", "Eclipse"]
+myFloats = ["MPlayer", "Gimp", "Skype", "Eclipse", "Dia"]
 myDashboardResources = ["Music", "Mutt", "Irssi"]
 mySpecialWorkspaces = [dashboardWorkspace]
 
