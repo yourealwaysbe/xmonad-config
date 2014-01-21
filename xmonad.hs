@@ -481,8 +481,8 @@ myLayout =
 -- To match on the WM_NAME, you can use 'title' in the same way that
 -- 'className' and 'resource' are used below.
 
-myFullscreens = ["Firefox","Viking"]
-myFloats = ["MPlayer", "Gimp", "Skype", "Eclipse"]
+myFullscreens = ["Firefox"]
+myFloats = ["MPlayer", "Gimp", "Skype", "Eclipse", "Viking"]
 myDashboardResources = ["Music", "Mutt", "Irssi"]
 mySpecialWorkspaces = [dashboardWorkspace]
 
