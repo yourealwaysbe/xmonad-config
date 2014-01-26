@@ -319,7 +319,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm, xK_v), spawn "viking /home/matt/cycling/planning.vik")
 
     -- viking
-    , ((modm .|. shiftMast, xK_v), spawn "viking /home/matt/cycling/all.vik")
+    , ((modm .|. shiftMask, xK_v), spawn "viking /home/matt/cycling/all.vik")
 
     -- launch dmenu
     -- , ((modm, xK_p), spawn "exe=`dmenu_path | dmenu` && eval \"exec $exe\"")
