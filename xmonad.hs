@@ -12,11 +12,12 @@ import XMonad.Util.Loggers
 import XMonad.Util.NamedWindows (getName)
 import XMonad.Util.Themes
 import XMonad.Util.EZConfig
-import XMonad.Util.XUtils 
+import XMonad.Util.XUtils
 import XMonad.Actions.CycleWS
 import XMonad.Actions.DynamicWorkspaces
 import XMonad.Hooks.ManageHelpers
-import XMonad.Layout.NoFrillsDecoration 
+import XMonad.Hooks.SetWMName
+import XMonad.Layout.NoFrillsDecoration
 import XMonad.Layout.SimplestFloat
 import XMonad.Layout.PerWorkspace
 
@@ -63,7 +64,7 @@ colorInactive = xmobarColor myInactiveFontColor myInactiveColor
 
 
 
--- max length of win titles on bar 
+-- max length of win titles on bar
 myTitleLength = 130
 
 -- Get a list of open windows for bar
@@ -82,12 +83,12 @@ logWindows = withWindowSet getWindowLog
 --     where
 --         curw = W.peek ws
 --         getTitle w = let isCur = (Just w == curw) in
---                      fmap (formatTitle isCur . show) $ getName w 
---         formatTitle f s = let s' = take myTitleLength s in 
---                           let color = if f then colorActive 
+--                      fmap (formatTitle isCur . show) $ getName w
+--         formatTitle f s = let s' = take myTitleLength s in
+--                           let color = if f then colorActive
 --                                            else colorInactive in
 --                           " " ++ color s' ++ " "
--- 
+--
 getWindowLog :: WindowSet -> X (Maybe String)
 getWindowLog ws = do
     n <- gets (currentNumWins . windowset)
@@ -95,9 +96,9 @@ getWindowLog ws = do
     where
         curw = W.peek ws
         addTitle len s w = let isCur = (Just w == curw) in
-                           fmap ((s ++) . formatTitle len isCur . show) $ getName w 
-        formatTitle len cur s = let s' = take (len - 2) s in 
-                                let color = if cur then colorActive 
+                           fmap ((s ++) . formatTitle len isCur . show) $ getName w
+        formatTitle len cur s = let s' = take (len - 2) s in
+                                let color = if cur then colorActive
                                                    else colorInactive in
                                 " " ++ color s' ++ " "
 
@@ -111,9 +112,9 @@ layoutToString :: String -> String
 layoutToString d = concatMap doXY layouts
     where
         doXY (l, s) = if l `isInfixOf` d then s else ""
-        layouts = [("Tall", ".t."), 
-                   ("Mirror", "'"), 
-                   ("Float", ".f."), 
+        layouts = [("Tall", ".t."),
+                   ("Mirror", "'"),
+                   ("Float", ".f."),
                    ("Full", ". .")]
 
 myPP = xmobarPP { ppCurrent = colorActive
@@ -133,11 +134,11 @@ createNewWorkspace = do
     withWindowSet $ \ws -> do
         let nameWS n = let name = "w" ++ (show n) in
                        if (W.tagMember name ws)
-                       then nameWS (n+1) 
-                       else name 
+                       then nameWS (n+1)
+                       else name
         addWorkspace (nameWS 0)
         sendMessage ToggleStruts
-                    
+
 cautiousRemoveWorkspace = do
     curtag <- gets (W.currentTag . windowset)
     when (not (elem curtag myWorkspaces)) removeEmptyWorkspace
@@ -155,7 +156,7 @@ modifyRect :: (Rectangle -> Rectangle) -> Window -> X ()
 modifyRect rmod w = do
     disp <- asks display
     wa <- io $ getWindowAttributes disp w
-    tileWindow w (rmod (Rectangle (fi $ wa_x wa) 
+    tileWindow w (rmod (Rectangle (fi $ wa_x wa)
                                   (fi $ wa_y wa)
                                   ((fi $ wa_width wa) + (fi 2*myBorderWidth))
                                   ((fi $ wa_height wa) + (fi 2*myBorderWidth))))
@@ -165,7 +166,7 @@ floatsAvoidStruts :: X ()
 floatsAvoidStruts = do
         XConf { display = disp, theRoot = rootw } <- ask
         l <- gets (currentLayout . windowset)
-        when ("AvoidStruts (fromList [U,D,R,L])" `isInfixOf` (show l)) $ do 
+        when ("AvoidStruts (fromList [U,D,R,L])" `isInfixOf` (show l)) $ do
             rmod <- calcGap (S.fromList [U,D,L,R]);
             withFloats $ modifyRect rmod
 
@@ -173,7 +174,7 @@ floatsAvoidStruts = do
 
 -- doIf :: (Window -> Bool) -> (Window -> X()) -> Window -> X ()
 -- and others...
-doIf = liftM2 when 
+doIf = liftM2 when
 
 withWindows :: (Window -> X ()) -> X ()
 withWindows f = do
@@ -190,12 +191,12 @@ hideFloats = do
     floats <- gets (W.floating . windowset)
     let isFloat = flip M.member floats
     let getOtherWins = liftM2 (++) W.up W.down
-    let doStack = flip whenJust $ 
+    let doStack = flip whenJust $
             liftM2 when (not . isFloat . W.focus)
                         (mapM_ (doIf isFloat hide) . getOtherWins)
     let getScreens = liftM2 (:) W.current W.visible
     let getStack = W.stack . W.workspace
-    withWindowSet $ mapM_ (doStack . getStack) . getScreens 
+    withWindowSet $ mapM_ (doStack . getStack) . getScreens
 
 raiseFocused :: X ()
 raiseFocused = do
@@ -209,7 +210,7 @@ raiseFocused = do
 
 setModReleaseCatch :: X ()
 setModReleaseCatch = do
-    XConf { theRoot = root, display = disp } <- ask 
+    XConf { theRoot = root, display = disp } <- ask
     io $ grabKeyboard disp root False grabModeAsync grabModeAsync currentTime
     return ()
 
@@ -222,16 +223,16 @@ currentLayout :: W.StackSet i l a s sd -> l
 currentLayout = W.layout . W.workspace . W.current
 
 currentNumWins :: W.StackSet i l a s sd -> Int
-currentNumWins = length . W.index 
+currentNumWins = length . W.index
 
 currentlyShifting = do
-    (ws, l, n, mw, floats) <- gets ((liftM5 (,,,,) W.currentTag 
-                                                   currentLayout 
+    (ws, l, n, mw, floats) <- gets ((liftM5 (,,,,) W.currentTag
+                                                   currentLayout
                                                    currentNumWins
                                                    W.peek
                                                    W.floating) . windowset)
-    return (maybe False (\w -> M.member w floats) mw || 
-            (ws == dashboardWorkspace && n > 2) || 
+    return (maybe False (\w -> M.member w floats) mw ||
+            (ws == dashboardWorkspace && n > 2) ||
             ("Float" `isInfixOf` (description l)) ||
             ("Full" `isInfixOf` (description l)))
 
@@ -263,10 +264,10 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- add a tag
     , ((modm, xK_a), createNewWorkspace)
- 
+
     -- delete a tag
     , ((modm, xK_d), cautiousRemoveWorkspace)
-  
+
     -- launch gvim
     , ((modm, xK_g), spawn "gvim")
 
@@ -323,67 +324,67 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- launch dmenu
     -- , ((modm, xK_p), spawn "exe=`dmenu_path | dmenu` && eval \"exec $exe\"")
- 
+
     -- launch gmrun
     , ((modm .|. shiftMask, xK_p), spawn "gmrun")
- 
+
     -- close focused window
     , ((modm .|. shiftMask, xK_c), kill)
- 
+
      -- Rotate through the available layout algorithms
     , ((modm, xK_space ), sendMessage NextLayout)
- 
+
     --  Reset the layouts on the current workspace to default
     , ((modm .|. shiftMask, xK_space), setLayout $ XMonad.layoutHook conf)
- 
+
     -- Resize viewed windows to the correct size
     , ((modm, xK_n), refresh)
- 
+
     -- Move focus to the next window
     -- , ((modm, xK_Tab), windows W.focusDown)
- 
+
     -- Move focus to the next window
     , ((modm, xK_j), changeFocus W.focusDown)
- 
+
     -- Move focus to the previous window
     , ((modm, xK_k), changeFocus W.focusUp  )
- 
+
     -- Move focus to the master window
     -- , ((modm, xK_m), windows W.focusMaster  )
- 
+
     -- Swap the focused window and the master window
     , ((modm .|. shiftMask, xK_Return), windows W.swapMaster)
- 
+
     -- Swap the focused window with the next window
     , ((modm .|. mod1Mask, xK_h), windows W.swapDown  )
- 
+
     -- Swap the focused window with the previous window
     , ((modm .|. mod1Mask, xK_l), windows W.swapUp    )
- 
+
     -- Shrink the master area
     , ((modm, xK_h), sendMessage Shrink)
- 
+
     -- Expand the master area
     , ((modm, xK_l), sendMessage Expand)
- 
+
     -- Push window back into tiling
     -- , ((modm, xK_t), withFocused $ windows . W.sink)
-    
+
     -- Increment the number of windows in the master area
     -- , ((modm, xK_comma), sendMessage (IncMasterN 1))
- 
+
     -- Deincrement the number of windows in the master area
     -- , ((modm, xK_period), sendMessage (IncMasterN (-1)))
- 
+
     -- Toggle the status bar gap
     -- Use this binding with avoidStruts from Hooks.ManageDocks.
     -- See also the statusBar function from Hooks.DynamicLog.
     --
     -- , ((modm, xK_b), sendMessage ToggleStruts)
- 
+
     -- Quit xmonad
     , ((modm .|. shiftMask, xK_q), io (exitWith ExitSuccess))
- 
+
     -- Restart xmonad
     , ((modm, xK_q), spawn "xmonad --recompile; xmonad --restart")
     ]
@@ -395,39 +396,39 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     ++
     zip (zip (repeat (modm .|. shiftMask)) [xK_1..xK_9]) (map (withNthWorkspace W.shift) [0..])
     ++
-   
+
     -- mod-alt-{1,2,3}, Switch to physical/Xinerama screens 1, 2, or 3
     -- mod-shift-alt-{1,2,3}, Move client to screen 1, 2, or 3
     [((m .|. modm, key), screenWorkspace sc >>= flip whenJust (windows . f))
         | (key, sc) <- zip [xK_1, xK_2, xK_3] [0..]
         , (f, m) <- [(W.view, mod1Mask), (W.shift, shiftMask .|. mod1Mask)]]
- 
- 
+
+
 ------------------------------------------------------------------------
 -- Mouse bindings: default actions bound to mouse events
 
 button9     =  9 :: Button
 
 myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
- 
+
     -- mod-button1, Set the window to floating mode and move by dragging
     [ ((modm, button1), (\w -> focus w >> mouseMoveWindow w
                                        >> windows W.shiftMaster))
- 
+
     -- mod-button2, Raise the window to the top of the stack
     , ((modm, button2), (\w -> focus w >> windows W.shiftMaster))
- 
+
     -- mod-button3, Set the window to floating mode and resize by dragging
     , ((modm, button3), (\w -> focus w >> mouseResizeWindow w
                                        >> windows W.shiftMaster))
- 
+
     -- you may also bind events to the mouse scroll wheel (button4 and button5)
-    , ((0, button9), (\w -> nextWS)) 
+    , ((0, button9), (\w -> nextWS))
     ]
- 
+
 ------------------------------------------------------------------------
 -- Layouts:
- 
+
 -- You can specify and transform your layouts by modifying these values.
 -- If you change layout bindings be sure to use 'mod-shift-space' after
 -- restarting (with 'mod-q') to reset your layout state to the new
@@ -442,24 +443,24 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 -- The available layouts.  Note that each layout is separated by |||,
 -- which denotes layout choice.
 --
-myLayout = 
+myLayout =
     decoratedWorkspaces ||| Full
-    where                  
-        decoratedWorkspaces = decoration $ 
-                              onWorkspace dashboardWorkspace tiled $ 
+    where
+        decoratedWorkspaces = decoration $
+                              onWorkspace dashboardWorkspace tiled $
                               (tiled ||| Mirror tiled ||| simplestFloat)
 
         decoration = noFrillsDeco shrinkText titleTheme
 
         -- default tiling algorithm partitions the screen into two panes
         tiled   = Tall nmaster delta ratio
- 
+
         -- The default number of windows in the master pane
         nmaster = 1
- 
+
         -- Default proportion of screen occupied by master pane
         ratio   = 1/2
- 
+
         -- Percent of screen to increment by when resizing panes
         delta   = 3/100
 
@@ -471,10 +472,10 @@ myLayout =
                         , fontName = myFont
                         , decoHeight = 18
                         }
- 
+
 ------------------------------------------------------------------------
 -- Window rules:
- 
+
 -- Execute arbitrary actions and WindowSet manipulations when managing
 -- a new window. You can use this to, for example, always float a
 -- particular program, or have a client always appear on a particular
@@ -511,16 +512,16 @@ setFloat = composeOne . concat $
     , [ isFullscreen -?> doFullFloat ] ]
 
 setIgnore = composeAll [ resource  =? "desktop_window" --> doIgnore
-                       , resource  =? "kdesktop"       --> doIgnore ] 
+                       , resource  =? "kdesktop"       --> doIgnore ]
 
 
-toWS = composeOne . concat $ 
-           [ [ resource =? t -?> doViewShift dashboardWorkspace | t <- myDashboardResources ] 
+toWS = composeOne . concat $
+           [ [ resource =? t -?> doViewShift dashboardWorkspace | t <- myDashboardResources ]
            , [ fmap Just doAvoidSpecial ] ]
-           where 
+           where
                doViewShift = doF . viewShift
                viewShift = liftM2 (.) W.greedyView W.shift
-               doAvoidSpecial = doF avoidSpecial 
+               doAvoidSpecial = doF avoidSpecial
                avoidSpecial ss = viewShift ws ss
                                  where
                                      curws = W.currentTag ss
@@ -533,7 +534,7 @@ toWS = composeOne . concat $
 
 ------------------------------------------------------------------------
 -- Event handling
- 
+
 -- Defines a custom handler function for X Events. The function should
 -- return (All True) if the default handler is to be run afterwards. To
 -- combine event hooks use mappend or mconcat from Data.Monoid.
@@ -544,7 +545,7 @@ toWS = composeOne . concat $
 -- combining them with ewmhDesktopsEventHook.
 
 modKeyEvents :: Event -> X All
-modKeyEvents (KeyEvent {ev_event_type = t, ev_keycode = code}) 
+modKeyEvents (KeyEvent {ev_event_type = t, ev_keycode = code})
   | (t == keyRelease) && (code == modKeyCode) = onModRelease
   | otherwise = return (All True)
 modKeyEvents e = --do
@@ -552,12 +553,12 @@ modKeyEvents e = --do
     return (All True)
 
 
-myEventHook = modKeyEvents 
+myEventHook = modKeyEvents
 
 
 ------------------------------------------------------------------------
 -- Status bars and logging
- 
+
 -- Perform an arbitrary action on each internal state change or X event.
 -- See the 'XMonad.Hooks.DynamicLog' extension for examples.
 --
@@ -568,10 +569,10 @@ myEventHook = modKeyEvents
 -- combining it with ewmhDesktopsLogHook.
 --
 myLogHook = floatsAvoidStruts <+> raiseFocused <+> hideFloats
- 
+
 ------------------------------------------------------------------------
 -- Startup hook
- 
+
 -- Perform an arbitrary action each time xmonad starts or is restarted
 -- with mod-q.  Used by, e.g., XMonad.Layout.PerWorkspace to initialize
 -- per-workspace layout choices.
@@ -584,13 +585,13 @@ myLogHook = floatsAvoidStruts <+> raiseFocused <+> hideFloats
 -- hook by combining it with ewmhDesktopsStartup.
 
 -- hide struts by default
-myStartupHook = broadcastMessage ToggleStruts
- 
+myStartupHook = setWMName "LG3D" <+> broadcastMessage ToggleStruts
+
 ------------------------------------------------------------------------
 -- Now run xmonad with all the defaults we set up.
- 
+
 main = xmonad =<< statusBar myBar myPP toggleStrutsKey defaults
- 
+
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will
 -- use the defaults defined in xmonad/XMonad/Config.hs
@@ -608,11 +609,11 @@ defaults = defaultConfig {
         workspaces         = myWorkspaces,
         normalBorderColor  = myNormalBorderColor,
         focusedBorderColor = myFocusedBorderColor,
- 
+
       -- key bindings
         keys               = myKeys,
         mouseBindings      = myMouseBindings,
- 
+
       -- hooks, layouts
         layoutHook         = myLayout,
         manageHook         = myManageHook,
