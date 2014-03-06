@@ -539,12 +539,7 @@ toWS = composeOne . concat $
 -- Defines a custom handler function for X Events. The function should
 -- return (All True) if the default handler is to be run afterwards. To
 -- combine event hooks use mappend or mconcat from Data.Monoid.
---
--- * NOTE: EwmhDesktops users should use the 'ewmh' function from
--- XMonad.Hooks.EwmhDesktops to modify their defaultConfig as a whole.
--- It will add EWMH event handling to your custom event hooks by
--- combining them with ewmhDesktopsEventHook.
-
+---
 modKeyEvents :: Event -> X All
 modKeyEvents (KeyEvent {ev_event_type = t, ev_keycode = code})
   | (t == keyRelease) && (code == modKeyCode) = onModRelease
@@ -553,8 +548,17 @@ modKeyEvents e = --do
     -- spawn ("echo " ++ (show e) ++ " >> /home/matt/log")
     return (All True)
 
+-- turns out you don't need to do the raised focus, maybe ewmh takes care of it,
+-- but here it was anyway...
+-- focusEvents :: Event -> X All
+-- focusEvents (CrossingEvent {ev_event_type = t})
+--   | (t == focusIn) = do
+--         raiseFocused
+--         return (All True)
+--   | otherwise = return (All True)
+-- focusEvents e = return (All True)
 
-myEventHook = modKeyEvents
+myEventHook = modKeyEvents -- <+> focusEvents
 
 
 ------------------------------------------------------------------------
@@ -563,13 +567,8 @@ myEventHook = modKeyEvents
 -- Perform an arbitrary action on each internal state change or X event.
 -- See the 'XMonad.Hooks.DynamicLog' extension for examples.
 --
---
--- * NOTE: EwmhDesktops users should use the 'ewmh' function from
--- XMonad.Hooks.EwmhDesktops to modify their defaultConfig as a whole.
--- It will add EWMH logHook actions to your custom log hook by
--- combining it with ewmhDesktopsLogHook.
---
-myLogHook = floatsAvoidStruts <+> raiseFocused <+> hideFloats
+--myLogHook = floatsAvoidStruts <+> hideFloats
+myLogHook = floatsAvoidStruts <+> hideFloats
 
 ------------------------------------------------------------------------
 -- Startup hook
@@ -580,12 +579,8 @@ myLogHook = floatsAvoidStruts <+> raiseFocused <+> hideFloats
 --
 -- By default, do nothing.
 --
--- * NOTE: EwmhDesktops users should use the 'ewmh' function from
--- XMonad.Hooks.EwmhDesktops to modify their defaultConfig as a whole.
--- It will add initialization of EWMH support to your custom startup
--- hook by combining it with ewmhDesktopsStartup.
-
--- hide struts by default
+-- hide struts by default, LG3D is a pretend window manager name to make java
+-- apps work...
 myStartupHook = setWMName "LG3D" <+> broadcastMessage ToggleStruts
 
 ------------------------------------------------------------------------
