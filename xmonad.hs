@@ -20,6 +20,7 @@ import XMonad.Hooks.SetWMName
 import XMonad.Layout.NoFrillsDecoration
 import XMonad.Layout.SimplestFloat
 import XMonad.Layout.PerWorkspace
+import XMonad.Hooks.EwmhDesktops
 
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
@@ -590,7 +591,7 @@ myStartupHook = setWMName "LG3D" <+> broadcastMessage ToggleStruts
 ------------------------------------------------------------------------
 -- Now run xmonad with all the defaults we set up.
 
-main = xmonad =<< statusBar myBar myPP toggleStrutsKey defaults
+main = xmonad =<< statusBar myBar myPP toggleStrutsKey (ewmh defaults)
 
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will
@@ -617,7 +618,7 @@ defaults = defaultConfig {
       -- hooks, layouts
         layoutHook         = myLayout,
         manageHook         = myManageHook,
-        handleEventHook    = myEventHook,
+        handleEventHook    = myEventHook <+> fullscreenEventHook,
         logHook            = myLogHook,
         startupHook        = myStartupHook
     } `additionalKeysP`
