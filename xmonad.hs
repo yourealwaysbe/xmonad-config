@@ -548,17 +548,7 @@ modKeyEvents e = --do
     -- spawn ("echo " ++ (show e) ++ " >> /home/matt/log")
     return (All True)
 
--- turns out you don't need to do the raised focus, maybe ewmh takes care of it,
--- but here it was anyway...
--- focusEvents :: Event -> X All
--- focusEvents (CrossingEvent {ev_event_type = t})
---   | (t == focusIn) = do
---         raiseFocused
---         return (All True)
---   | otherwise = return (All True)
--- focusEvents e = return (All True)
-
-myEventHook = modKeyEvents -- <+> focusEvents
+myEventHook = modKeyEvents
 
 
 ------------------------------------------------------------------------
@@ -567,8 +557,7 @@ myEventHook = modKeyEvents -- <+> focusEvents
 -- Perform an arbitrary action on each internal state change or X event.
 -- See the 'XMonad.Hooks.DynamicLog' extension for examples.
 --
---myLogHook = floatsAvoidStruts <+> hideFloats
-myLogHook = floatsAvoidStruts <+> hideFloats
+myLogHook = floatsAvoidStruts <+> raiseFocused <+> hideFloats
 
 ------------------------------------------------------------------------
 -- Startup hook
