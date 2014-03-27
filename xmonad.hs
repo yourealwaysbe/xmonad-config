@@ -258,7 +258,10 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm, xK_backslash), spawn $ XMonad.terminal conf)
 
     -- unmanage window
-    , ((modm, xK_u), withFocused unmanage)
+    -- , ((modm, xK_u), withFocused unmanage)
+
+    -- bloody wifi
+    , ((modm, xK_r), spawn & "interdown home; inter home")
 
     -- maximise window
     , ((modm, xK_Up), toggleMax)
@@ -575,7 +578,13 @@ myStartupHook = setWMName "LG3D" <+> broadcastMessage ToggleStruts
 ------------------------------------------------------------------------
 -- Now run xmonad with all the defaults we set up.
 
-main = xmonad =<< statusBar myBar myPP toggleStrutsKey (ewmh defaults)
+main = xmonad =<< statusBar myBar myPP toggleStrutsKey defaults -- (ewmh defaults)
+
+-- ewmh things to try
+-- startupHook     = startupHook c +++ ewmhDesktopsStartup
+-- handleEventHook = handleEventHook c +++ ewmhDesktopsEventHook
+-- logHook         = logHook c +++ ewmhDesktopsLogHook }
+
 
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will
@@ -602,7 +611,7 @@ defaults = defaultConfig {
       -- hooks, layouts
         layoutHook         = myLayout,
         manageHook         = myManageHook,
-        handleEventHook    = myEventHook <+> fullscreenEventHook,
+        handleEventHook    = myEventHook, -- <+> fullscreenEventHook,
         logHook            = myLogHook,
         startupHook        = myStartupHook
     } `additionalKeysP`
