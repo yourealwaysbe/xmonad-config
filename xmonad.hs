@@ -261,7 +261,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- , ((modm, xK_u), withFocused unmanage)
 
     -- bloody wifi
-    , ((modm, xK_r), spawn & "interdown home; inter home")
+    , ((modm, xK_r), spawn $ "interdown home; inter home")
 
     -- maximise window
     , ((modm, xK_Up), toggleMax)
