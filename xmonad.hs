@@ -510,10 +510,11 @@ myManageHook = toWS <+> setFloat <+> setIgnore
 -- notM = liftM not
 
 setFloat = composeOne . concat $
-    [ [ isDialog -?> doFloat ]
+    [ [ isFullscreen -?> doFullFloat ]
+    , [ isDialog -?> doFloat ]
     , [ className =? c -?> doFloat | c <- myFloats ]
     , [ className =? c -?> doFullFloat | c <- myFullscreens ]
-    , [ isFullscreen -?> doFullFloat ] ]
+    ]
 
 setIgnore = composeAll [ resource  =? "desktop_window" --> doIgnore
                        , resource  =? "kdesktop"       --> doIgnore ]
@@ -578,7 +579,17 @@ myStartupHook = setWMName "LG3D" <+> broadcastMessage ToggleStruts
 ------------------------------------------------------------------------
 -- Now run xmonad with all the defaults we set up.
 
-main = xmonad =<< statusBar myBar myPP toggleStrutsKey defaults -- (ewmh defaults)
+-- this is my attempt to use ewmh to stop gimp floats spinning in a tight loop
+-- with another window being tiled while still allowing iplayer/vimeo to stay
+-- full screen when flash loses focus
+myEwmh :: XConfig a -> XConfig a
+myEwmh c = c { startupHook     = startupHook c +++ ewmhDesktopsStartup
+             , handleEventHook = handleEventHook c +++ ewmhDesktopsEventHook +++ fullscreenEventHook
+             ---, logHook         = logHook c +++ ewmhDesktopsLogHook
+             }
+ where x +++ y = mappend x y
+
+main = xmonad =<< statusBar myBar myPP toggleStrutsKey (myEwmh defaults)
 
 -- ewmh things to try
 -- startupHook     = startupHook c +++ ewmhDesktopsStartup
@@ -611,7 +622,7 @@ defaults = defaultConfig {
       -- hooks, layouts
         layoutHook         = myLayout,
         manageHook         = myManageHook,
-        handleEventHook    = myEventHook, -- <+> fullscreenEventHook,
+        handleEventHook    = myEventHook,
         logHook            = myLogHook,
         startupHook        = myStartupHook
     } `additionalKeysP`
