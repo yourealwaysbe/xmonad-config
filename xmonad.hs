@@ -601,12 +601,6 @@ myEwmh c = c { startupHook     = startupHook c +++ ewmhDesktopsStartup
 
 main = xmonad =<< statusBar myBar myPP toggleStrutsKey (myEwmh defaults)
 
--- ewmh things to try
--- startupHook     = startupHook c +++ ewmhDesktopsStartup
--- handleEventHook = handleEventHook c +++ ewmhDesktopsEventHook
--- logHook         = logHook c +++ ewmhDesktopsLogHook }
-
-
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will
 -- use the defaults defined in xmonad/XMonad/Config.hs
