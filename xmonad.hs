@@ -9,7 +9,7 @@ import XMonad.Hooks.DebugKeyEvents
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.DynamicLog
 import XMonad.Util.Loggers
-import XMonad.Util.NamedWindows (getName)
+import XMonad.Util.NamedWindows (getName, NamedWindow)
 import XMonad.Util.Themes
 import XMonad.Util.EZConfig
 import XMonad.Util.XUtils
@@ -580,14 +580,24 @@ myStartupHook = setWMName "LG3D" <+> broadcastMessage ToggleStruts
 -- Now run xmonad with all the defaults we set up.
 
 -- this is my attempt to use ewmh to stop gimp floats spinning in a tight loop
--- with another window being tiled while still allowing iplayer/vimeo to stay
--- full screen when flash loses focus
+-- with another window being tiled while still allowing iplayer to stay
+-- full screen when flash loses focus, and stop de-fullscreening vimeo from
+-- resizing firefox
 myEwmh :: XConfig a -> XConfig a
 myEwmh c = c { startupHook     = startupHook c +++ ewmhDesktopsStartup
-             , handleEventHook = handleEventHook c +++ ewmhDesktopsEventHook +++ fullscreenEventHook
-             ---, logHook         = logHook c +++ ewmhDesktopsLogHook
+             , handleEventHook = handleEventHook c +++ ewmhDesktopsEventHook +++ myFullscreenEventHook
+             --- , logHook         = logHook c +++ ewmhDesktopsLogHook
              }
- where x +++ y = mappend x y
+ where
+    x +++ y = mappend x y
+    myFullscreenEventHook :: Event -> X All
+    myFullscreenEventHook e = do
+        nw <- getName (ev_window e)
+        if not ("Vimeo" `isInfixOf` (show nw))
+        then fullscreenEventHook e
+        else return (All True)
+
+
 
 main = xmonad =<< statusBar myBar myPP toggleStrutsKey (myEwmh defaults)
 
