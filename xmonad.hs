@@ -630,4 +630,11 @@ defaults = defaultConfig {
         logHook            = myLogHook,
         startupHook        = myStartupHook
     } `additionalKeysP`
-    [ ("<XF86TouchpadToggle>", spawn "xset s off; xset -dpms") ]
+    [ ("<XF86TouchpadToggle>", spawn "xset s off; xset -dpms")
+    , ("<XF86AudioRaiseVolume>", spawn "amixer set Master 3%+")
+    , ("<XF86AudioLowerVolume>", spawn "amixer set Master 3%-")
+    , ("<XF86AudioMute>", spawn "amixer sset Master toggle")
+    , ("<XF86AudioPlay>", spawn "mpc toggle")
+    , ("<XF86Forward>", spawn "mpc next")
+    , ("<XF86Back>", spawn "mpc prev")
+    ]
