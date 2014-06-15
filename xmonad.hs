@@ -260,9 +260,6 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- unmanage window
     -- , ((modm, xK_u), withFocused unmanage)
 
-    -- bloody wifi
-    , ((modm, xK_r), spawn $ "interdown home; inter home")
-
     -- maximise window
     , ((modm, xK_Up), toggleMax)
 
@@ -283,6 +280,9 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
      -- launch firefox
     , ((modm, xK_f), spawn "firefox")
+
+     -- launch coolreader
+    , ((modm, xK_r), spawn "cr3")
 
     -- prev tag
     , ((modm, xK_comma), prevWS)
