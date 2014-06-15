@@ -493,7 +493,7 @@ myLayout =
 -- 'className' and 'resource' are used below.
 
 myFullscreens = ["Firefox","Viking","VirtualBox"]
-myFloats = ["MPlayer", "Gimp", "Skype", "Eclipse", "Dia"]
+myFloats = ["MPlayer", "Gimp", "Skype", "Eclipse", "Dia", "CoolReader", "Hugin"]
 myDashboardResources = ["Music", "Mutt", "Irssi"]
 mySpecialWorkspaces = [dashboardWorkspace]
 
