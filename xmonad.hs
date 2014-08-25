@@ -282,7 +282,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm, xK_f), spawn "firefox")
 
     -- launch florence
-    , ((modm .|. shiftMask, xK_f), spawn "onboard")
+    , ((modm .|. shiftMask, xK_k), spawn "onboard")
 
      -- launch coolreader
     , ((modm, xK_r), spawn "cr3")
