@@ -281,6 +281,9 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
      -- launch firefox
     , ((modm, xK_f), spawn "firefox")
 
+    -- launch florence
+    , ((modm .|. shiftMask, xK_f), spawn "onboard")
+
      -- launch coolreader
     , ((modm, xK_r), spawn "cr3")
 
@@ -500,9 +503,11 @@ myFullscreens = [ "Firefox"
                 , "libreoffice-calc"
                 , "libreoffice-writer"
                 ]
-myFloats = ["MPlayer", "Gimp", "Skype", "Eclipse", "Dia", "Hugin"]
+myFloats = ["MPlayer", "Gimp", "Skype", "Eclipse", "Dia", "Hugin", "Onboard"]
 myDashboardResources = ["Music", "Mutt", "Irssi"]
+myAnywheres = ["Onboard"]
 mySpecialWorkspaces = [dashboardWorkspace]
+
 
 myManageHook = toWS <+> setFloat <+> setIgnore
 
@@ -528,7 +533,8 @@ setIgnore = composeAll [ resource  =? "desktop_window" --> doIgnore
 
 
 toWS = composeOne . concat $
-           [ [ resource =? t -?> doViewShift dashboardWorkspace | t <- myDashboardResources ]
+           [ [ className =? c -?> (doF id) | c <- myAnywheres ]
+           , [ resource =? t -?> doViewShift dashboardWorkspace | t <- myDashboardResources ]
            , [ fmap Just doAvoidSpecial ] ]
            where
                doViewShift = doF . viewShift
@@ -644,4 +650,6 @@ defaults = defaultConfig {
     , ("<XF86AudioPlay>", spawn "mpc toggle")
     , ("<XF86Forward>", spawn "mpc next")
     , ("<XF86Back>", spawn "mpc prev")
+    , ("<XF86MonBrightnessUp>", spawn "xbacklight -inc 15")
+    , ("<XF86MonBrightnessDown>", spawn "xbacklight -dec 15")
     ]
