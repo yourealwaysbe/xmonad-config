@@ -282,7 +282,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm, xK_f), spawn "firefox")
 
     -- launch florence
-    , ((modm .|. shiftMask, xK_k), spawn "onboard")
+    , ((modm .|. shiftMask, xK_k), spawn "iok")
 
      -- launch coolreader
     , ((modm, xK_r), spawn "cr3")
@@ -503,9 +503,9 @@ myFullscreens = [ "Firefox"
                 , "libreoffice-calc"
                 , "libreoffice-writer"
                 ]
-myFloats = ["MPlayer", "Gimp", "Skype", "Eclipse", "Dia", "Hugin", "Onboard"]
+myFloats = ["MPlayer", "Gimp", "Skype", "Eclipse", "Dia", "Hugin", "Iok"]
 myDashboardResources = ["Music", "Mutt", "Irssi"]
-myAnywheres = ["Onboard"]
+myKeyboard = ["Iok"]
 mySpecialWorkspaces = [dashboardWorkspace]
 
 
@@ -533,7 +533,7 @@ setIgnore = composeAll [ resource  =? "desktop_window" --> doIgnore
 
 
 toWS = composeOne . concat $
-           [ [ className =? c -?> (doF id) | c <- myAnywheres ]
+           [ [ className =? c -?> (doF id) | c <- myKeyboard ]
            , [ resource =? t -?> doViewShift dashboardWorkspace | t <- myDashboardResources ]
            , [ fmap Just doAvoidSpecial ] ]
            where
