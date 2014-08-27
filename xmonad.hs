@@ -499,6 +499,8 @@ myFullscreens = [ "Firefox"
                 , "libreoffice-startcenter"
                 , "libreoffice-calc"
                 , "libreoffice-writer"
+                , "libreoffice"
+                , "LibreOffice 4.2"
                 ]
 myFloats = ["MPlayer", "Gimp", "Skype", "Eclipse", "Dia", "Hugin"]
 myDashboardResources = ["Music", "Mutt", "Irssi"]
