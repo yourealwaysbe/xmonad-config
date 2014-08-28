@@ -308,7 +308,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- music
     , ((modm, xK_m), spawn "urxvt -T Music -name Music -e /home/matt/bin/start-music.sh")
 
-    -- cantata
+    -- gui music
     , ((modm .|. shiftMask, xK_m), spawn "cantata")
 
     -- eee music
@@ -505,6 +505,8 @@ myFullscreens = [ "Firefox"
                 , "libreoffice-startcenter"
                 , "libreoffice-calc"
                 , "libreoffice-writer"
+                , "libreoffice"
+                , "LibreOffice 4.2"
                 , "cantata"
                 ]
 myFloats = ["MPlayer", "Gimp", "Skype", "Eclipse", "Dia", "Hugin", "Iok"]
