@@ -308,6 +308,12 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- music
     , ((modm, xK_m), spawn "urxvt -T Music -name Music -e /home/matt/bin/start-music.sh")
 
+    -- cantata
+    , ((modm .|. shiftMask, xK_m), spawn "cantata")
+
+    -- eee music
+    , ((modm .|. shiftMask, xK_e), spawn "urxvt -T Music -name Music -e /home/matt/bin/eee-do.sh")
+
     -- irssi
     , ((modm, xK_i), spawn "urxvt -T Irssi -name Irssi -e /home/matt/bin/start_irssi")
 
@@ -319,9 +325,6 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- stop mpd
     , ((modm, xK_s), spawn "mpc stop")
-
-    -- evince
-    , ((modm .|. shiftMask, xK_e), spawn "evince")
 
     -- viking
     , ((modm, xK_v), spawn "viking /home/matt/cycling/planning.vik")
@@ -502,6 +505,7 @@ myFullscreens = [ "Firefox"
                 , "libreoffice-startcenter"
                 , "libreoffice-calc"
                 , "libreoffice-writer"
+                , "cantata"
                 ]
 myFloats = ["MPlayer", "Gimp", "Skype", "Eclipse", "Dia", "Hugin", "Iok"]
 myDashboardResources = ["Music", "Mutt", "Irssi"]
