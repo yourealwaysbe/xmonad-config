@@ -332,6 +332,9 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- viking
     , ((modm .|. shiftMask, xK_v), spawn "viking /home/matt/cycling/all.vik")
 
+    -- brightness
+    , ((modm, xK_b), spawn "gbacklight")
+
     -- launch dmenu
     -- , ((modm, xK_p), spawn "exe=`dmenu_path | dmenu` && eval \"exec $exe\"")
 
@@ -509,9 +512,17 @@ myFullscreens = [ "Firefox"
                 , "LibreOffice 4.2"
                 , "cantata"
                 ]
-myFloats = ["MPlayer", "Gimp", "Skype", "Eclipse", "Dia", "Hugin", "Iok"]
+myFloats = [ "MPlayer"
+           , "Gimp"
+           , "Skype"
+           , "Eclipse"
+           , "Dia"
+           , "Hugin"
+           , "Iok"
+           , "Gbacklight"
+           ]
 myDashboardResources = ["Music", "Mutt", "Irssi"]
-myKeyboard = ["Iok"]
+myKeyboard = ["Iok", "Gbacklight"]
 mySpecialWorkspaces = [dashboardWorkspace]
 
 
