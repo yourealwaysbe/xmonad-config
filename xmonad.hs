@@ -321,10 +321,10 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm, xK_c), spawn "urxvt -T Chilon Radio -name Music -e /home/matt/bin/chilon-mpc.sh")
 
     -- pause mpd
-    , ((modm, xK_p), spawn "mpc toggle")
+    , ((modm, xK_p), spawn "mpc -h /home/matt/.config/mpd/socket toggle")
 
     -- stop mpd
-    , ((modm, xK_s), spawn "mpc stop")
+    , ((modm, xK_s), spawn "mpc -h /home/matt/.config/mpd/socket stop")
 
     -- viking
     , ((modm, xK_v), spawn "viking /home/matt/cycling/planning.vik")
@@ -664,9 +664,9 @@ defaults = defaultConfig {
     , ("<XF86AudioRaiseVolume>", spawn "amixer set Master 3%+")
     , ("<XF86AudioLowerVolume>", spawn "amixer set Master 3%-")
     , ("<XF86AudioMute>", spawn "amixer sset Master toggle")
-    , ("<XF86AudioPlay>", spawn "mpc toggle")
-    , ("<XF86Forward>", spawn "mpc next")
-    , ("<XF86Back>", spawn "mpc prev")
+    , ("<XF86AudioPlay>", spawn "mpc -h /home/matt/.config/mpd/socket toggle")
+    , ("<XF86Forward>", spawn "mpc -h /home/matt/.config/mpd/socket next")
+    , ("<XF86Back>", spawn "mpc -h /home/matt/.config/mpd/socket prev")
     , ("<XF86MonBrightnessUp>", spawn "xbacklight -inc 15")
     , ("<XF86MonBrightnessDown>", spawn "xbacklight -dec 15")
     ]
