@@ -669,4 +669,6 @@ defaults = defaultConfig {
     , ("<XF86Back>", spawn "mpc -h /home/matt/.config/mpd/socket prev")
     , ("<XF86MonBrightnessUp>", spawn "xbacklight -inc 15")
     , ("<XF86MonBrightnessDown>", spawn "xbacklight -dec 15")
+    , ("<XF86Launch1>", spawn "systemctl poweroff")
+    , ("<XF86WLAN>", spawn "systemctl poweroff")
     ]
