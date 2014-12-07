@@ -460,7 +460,7 @@ myLayout =
     decoratedWorkspaces ||| Full
     where
         decoratedWorkspaces = decoration $
-                              onWorkspace dashboardWorkspace tiled $
+                              onWorkspace dashboardWorkspace (tiled ||| Mirror tiled) $
                               (tiled ||| Mirror tiled ||| simplestFloat)
 
         decoration = noFrillsDeco shrinkText titleTheme
@@ -670,5 +670,5 @@ defaults = defaultConfig {
     , ("<XF86MonBrightnessUp>", spawn "xbacklight -inc 15")
     , ("<XF86MonBrightnessDown>", spawn "xbacklight -dec 15")
     , ("<XF86Launch1>", spawn "systemctl poweroff")
-    , ("<XF86WLAN>", spawn "systemctl poweroff")
+    , ("M#-4 <XF86PowerOff>", spawn "systemctl poweroff")
     ]
