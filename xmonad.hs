@@ -671,4 +671,5 @@ defaults = defaultConfig {
     , ("<XF86MonBrightnessDown>", spawn "xbacklight -dec 15")
     , ("<XF86Launch1>", spawn "systemctl poweroff")
     , ("M#-4 <XF86PowerOff>", spawn "systemctl poweroff")
+    , ("<XF86PowerOff>", spawn "easystroke send Toggle")
     ]
