@@ -20,6 +20,7 @@ import XMonad.Hooks.SetWMName
 import XMonad.Layout.NoFrillsDecoration
 import XMonad.Layout.SimplestFloat
 import XMonad.Layout.PerWorkspace
+import qualified XMonad.Layout.GridVariants as GV
 import XMonad.Hooks.EwmhDesktops
 
 import qualified XMonad.StackSet as W
@@ -116,7 +117,8 @@ layoutToString d = concatMap doXY layouts
         layouts = [("Tall", ".t."),
                    ("Mirror", "'"),
                    ("Float", ".f."),
-                   ("Full", ". .")]
+                   ("Full", ". ."),
+                   ("Grid", ".g.")]
 
 myPP = xmobarPP { ppCurrent = colorActive
                 , ppHidden = colorInactive
@@ -461,7 +463,7 @@ myLayout =
     where
         decoratedWorkspaces = decoration $
                               onWorkspace dashboardWorkspace (tiled ||| Mirror tiled) $
-                              (tiled ||| Mirror tiled ||| simplestFloat)
+                              (tiled ||| Mirror tiled ||| grid ||| simplestFloat)
 
         decoration = noFrillsDeco shrinkText titleTheme
 
@@ -476,6 +478,9 @@ myLayout =
 
         -- Percent of screen to increment by when resizing panes
         delta   = 3/100
+
+        -- 4/3 grid
+        grid = GV.Grid (4/3)
 
         titleTheme = defaultTheme
                         { activeColor = "#b6ca8f"
