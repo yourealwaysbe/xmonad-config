@@ -677,4 +677,5 @@ defaults = defaultConfig {
     , ("<XF86Launch1>", spawn "systemctl poweroff")
     , ("M#-4 <XF86PowerOff>", spawn "systemctl poweroff")
     , ("<XF86PowerOff>", spawn "easystroke send Toggle")
+    , ("<XF86Search>", spawn "/home/matt/bin/connect-headphones.sh")
     ]
