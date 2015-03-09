@@ -661,6 +661,7 @@ defaults = defaultConfig {
         startupHook        = myStartupHook
     } `additionalKeysP`
     [ ("<XF86TouchpadToggle>", spawn "xset s off; xset -dpms")
+    , ("<Print>", spawn "xset s off; xset -dpms")
     , ("<XF86AudioRaiseVolume>", spawn "amixer set Master 3%+")
     , ("<XF86AudioLowerVolume>", spawn "amixer set Master 3%-")
     , ("<XF86AudioMute>", spawn "amixer sset Master toggle")
