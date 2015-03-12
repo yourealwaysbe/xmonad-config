@@ -517,7 +517,7 @@ myFullscreens = [ "Firefox"
                 , "LibreOffice 4.2"
                 , "cantata"
                 ]
-myFloats = [ "MPlayer"
+myFloats = [ "mpv"
            , "Gimp"
            , "Skype"
            , "Eclipse"
