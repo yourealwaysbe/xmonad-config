@@ -596,7 +596,7 @@ myEventHook = modKeyEvents
 -- Perform an arbitrary action on each internal state change or X event.
 -- See the 'XMonad.Hooks.DynamicLog' extension for examples.
 --
-myLogHook = floatsAvoidStruts <+> raiseFocused <+> hideFloats
+myLogHook = floatsAvoidStruts <+> raiseFocused <+> hideFloats >> setWMName "LG3D"
 
 ------------------------------------------------------------------------
 -- Startup hook
