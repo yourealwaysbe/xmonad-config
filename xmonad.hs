@@ -291,6 +291,9 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- prev tag
     , ((modm, xK_comma), prevWS)
+    -- Note for making tool bar appear while cycling workspaces
+    -- sendMessage $ SetStruts [U] []
+    -- sendMessage $ SetStruts [] [U]
 
     -- next tag
     , ((modm, xK_period), nextWS)
