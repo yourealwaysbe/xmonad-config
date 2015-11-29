@@ -207,7 +207,12 @@ raiseFocused = do
     mw <- gets (W.peek . windowset)
     whenJust mw (io . (raiseWindow disp))
 
+-- Change workspace
 
+changeWS wsAction = do
+    sendMessage $ SetStruts [U] []
+    wsAction
+    setModReleaseCatch
 
 -- Stacking
 
@@ -216,7 +221,6 @@ setModReleaseCatch = do
     XConf { theRoot = root, display = disp } <- ask
     io $ grabKeyboard disp root False grabModeAsync grabModeAsync currentTime
     return ()
-
 
 changeFocus f = do
     windows f
@@ -241,11 +245,12 @@ currentlyShifting = do
 
 -- See also myEventHook
 onModRelease = do
-      XConf { display = disp, theRoot = root } <- ask
-      io $ ungrabKeyboard disp currentTime
-      shift <- currentlyShifting
-      when shift $ windows W.shiftMaster
-      return (All True)
+    sendMessage $ SetStruts [] [U]
+    XConf { display = disp, theRoot = root } <- ask
+    io $ ungrabKeyboard disp currentTime
+    shift <- currentlyShifting
+    when shift $ windows W.shiftMaster
+    return (All True)
 
 -- Keys
 --
@@ -290,10 +295,10 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm, xK_r), spawn "cr3")
 
     -- prev tag
-    , ((modm, xK_comma), prevWS)
+    , ((modm, xK_comma), changeWS prevWS)
 
     -- next tag
-    , ((modm, xK_period), nextWS)
+    , ((modm, xK_period), changeWS nextWS)
 
     -- prev screen
     , ((modm .|. mod1Mask, xK_comma), prevScreen)
@@ -609,7 +614,7 @@ myLogHook = floatsAvoidStruts <+> raiseFocused <+> hideFloats >> setWMName "LG3D
 --
 -- hide struts by default, LG3D is a pretend window manager name to make java
 -- apps work...
-myStartupHook = setWMName "LG3D" <+> broadcastMessage ToggleStruts
+myStartupHook = setWMName "LG3D" <+> (broadcastMessage $ SetStruts [] [])
 
 ------------------------------------------------------------------------
 -- Now run xmonad with all the defaults we set up.
