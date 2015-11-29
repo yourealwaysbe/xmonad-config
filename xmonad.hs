@@ -207,13 +207,6 @@ raiseFocused = do
     mw <- gets (W.peek . windowset)
     whenJust mw (io . (raiseWindow disp))
 
--- Change workspace
-
-changeWS wsAction = do
-    sendMessage $ SetStruts [U] []
-    wsAction
-    setModReleaseCatch
-
 -- Stacking
 
 setModReleaseCatch :: X ()
@@ -245,7 +238,6 @@ currentlyShifting = do
 
 -- See also myEventHook
 onModRelease = do
-    sendMessage $ SetStruts [] [U]
     XConf { display = disp, theRoot = root } <- ask
     io $ ungrabKeyboard disp currentTime
     shift <- currentlyShifting
@@ -295,10 +287,10 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm, xK_r), spawn "cr3")
 
     -- prev tag
-    , ((modm, xK_comma), changeWS prevWS)
+    , ((modm, xK_comma), prevWS)
 
     -- next tag
-    , ((modm, xK_period), changeWS nextWS)
+    , ((modm, xK_period), nextWS)
 
     -- prev screen
     , ((modm .|. mod1Mask, xK_comma), prevScreen)
