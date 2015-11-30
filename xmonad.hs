@@ -606,7 +606,7 @@ myLogHook = floatsAvoidStruts <+> raiseFocused <+> hideFloats >> setWMName "LG3D
 --
 -- hide struts by default, LG3D is a pretend window manager name to make java
 -- apps work...
-myStartupHook = setWMName "LG3D" <+> (broadcastMessage $ SetStruts [] [])
+myStartupHook = setWMName "LG3D" <+> (broadcastMessage $ SetStruts [] [U,D,L,R])
 
 ------------------------------------------------------------------------
 -- Now run xmonad with all the defaults we set up.
