@@ -284,7 +284,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm .|. shiftMask, xK_k), spawn "iok")
 
      -- launch coolreader
-    , ((modm, xK_r), spawn "cr3")
+    , ((modm, xK_r), spawn "FBReader")
 
     -- prev tag
     , ((modm, xK_comma), prevWS)
