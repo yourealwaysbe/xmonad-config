@@ -325,6 +325,10 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- stop mpd
     , ((modm, xK_s), spawn "mpc -h /home/matt/.config/mpd/socket stop")
 
+    -- brightness
+    , ((modm, xK_equal), spawn "xbacklight -inc 10")
+    , ((modm, xK_minus), spawn "xbacklight -dec 10")
+
     -- viking
     , ((modm, xK_v), spawn "viking /home/matt/cycling/planning.vik")
 
