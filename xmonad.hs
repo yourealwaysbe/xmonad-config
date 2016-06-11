@@ -281,7 +281,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm, xK_f), spawn "firefox")
 
     -- launch florence
-    , ((modm .|. shiftMask, xK_k), spawn "iok")
+    , ((modm .|. shiftMask, xK_k), spawn "onboard")
 
      -- launch coolreader
     , ((modm, xK_r), spawn "FBReader")
@@ -525,6 +525,7 @@ myFloats = [ "mpv"
            , "Dia"
            , "Hugin"
            , "Iok"
+           , "onboard"
            , "Gbacklight"
            ]
 myDashboardResources = ["Music", "Mutt", "Irssi"]
