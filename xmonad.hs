@@ -527,6 +527,7 @@ myFloats = [ "mpv"
            , "Iok"
            , "onboard"
            , "Gbacklight"
+           , "Steam.exe"
            ]
 myDashboardResources = ["Music", "Mutt", "Irssi"]
 myKeyboard = ["Iok", "Gbacklight"]
