@@ -269,9 +269,9 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((modm, xK_d), cautiousRemoveWorkspace)
 
     -- launch gvim
-    , ((modm, xK_g), spawn "gvim")
+    , ((modm, xK_g), spawn "nvim-qt")
 
-    -- launch gvim
+    -- launch gimp
     , ((modm .|. shiftMask, xK_g), spawn "gimp")
 
     -- launch skype
