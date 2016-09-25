@@ -50,14 +50,16 @@ myFocusFollowsMouse = False
 
 -- Default font
 myFont :: String
-myFont = "xft: Liberation Mono" ++
-         ":pixelsize=13" ++
-         ":antialiasing=true" ++
-         ":hinting=true" ++
-         ":autohinting=true" ++
-         ":hintstyle=hintfull" ++
-         ":rgba=rgb" ++
-         ":lcdfilter=lcdnone"
+myFont = "xft: Inconsolata" ++
+         ":pixelsize=16"
+-- try without these
+--         ++
+--         ":antialiasing=true" ++
+--         ":hinting=true" ++
+--         ":autohinting=true" ++
+--         ":hintstyle=hintfull" ++
+--         ":rgba=rgb" ++
+--         ":lcdfilter=lcdnone"
 
 -- Bar
 
@@ -525,12 +527,12 @@ myFloats = [ "mpv"
            , "Dia"
            , "Hugin"
            , "Iok"
-           , "onboard"
+           , "Onboard"
            , "Gbacklight"
            , "Steam.exe"
            ]
 myDashboardResources = ["Music", "Mutt", "Irssi"]
-myKeyboard = ["Iok", "Gbacklight"]
+myKeyboard = ["Onboard", "Gbacklight"]
 mySpecialWorkspaces = [dashboardWorkspace]
 
 
