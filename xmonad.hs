@@ -674,7 +674,7 @@ defaults = defaultConfig {
     , ("<Print>", spawn "xset s off; xset -dpms")
     , ("<XF86AudioRaiseVolume>", spawn "amixer set Master 3%+")
     , ("<XF86AudioLowerVolume>", spawn "amixer set Master 3%-")
-    , ("<XF86AudioMute>", spawn "amixer sset Master toggle")
+    , ("<XF86AudioMute>", spawn "amixer set Master toggle")
     , ("<XF86AudioPlay>", spawn "mpc -h /home/matt/.config/mpd/socket toggle")
     , ("<XF86Forward>", spawn "mpc -h /home/matt/.config/mpd/socket next")
     , ("<XF86Back>", spawn "mpc -h /home/matt/.config/mpd/socket prev")
